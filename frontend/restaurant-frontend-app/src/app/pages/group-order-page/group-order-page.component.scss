@@ -1,0 +1,156 @@
+
+@use '../../shared/styles/abstracts/colors' as color;
+
+
+.group-order-page {
+  min-height: 100vh;
+  background: color.$bg-yellow;
+  padding: 32px 16px;
+}
+
+.group-order-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+  border-radius: 16px;
+  background: color.$neutral-0;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  margin: 0 0 16px;
+  font-size: 28px;
+}
+
+.reservation-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: color.$neutral-600;
+}
+
+.participants {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.participants > li {
+  margin-bottom: 16px;
+}
+
+.total-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 20px;
+  border-top: 1px solid color.$neutral-200;
+  font-size: 20px;
+}
+
+.total-section strong {
+  color: color.$green-600;
+}
+
+@media (max-width: 375px) {
+  .group-order-container {
+    padding: 16px;
+  }
+
+  .reservation-details {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.pending-notice {
+  background: #fff8e1;
+  color: #765300;
+  border: 1px solid #f5e5ad;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 20px 0;
+}
+
+.consolidated-order {
+  margin-top: 24px;
+}
+
+.consolidated-order ul {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+
+.consolidated-order li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #edf0eb;
+}
+
+.submit-button {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #08783b;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submit-button:disabled {
+  background: #c7cfca;
+  cursor: not-allowed;
+}
+
+.status-badge {
+  display: inline-block;
+  margin: 10px 0;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #e5f4e8;
+  color: #08783b;
+  font-size: 13px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgb(0 0 0 / 45%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.confirmation-dialog {
+  width: 100%;
+  max-width: 440px;
+  padding: 24px;
+  border-radius: 16px;
+  background: white;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.dialog-actions button {
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}

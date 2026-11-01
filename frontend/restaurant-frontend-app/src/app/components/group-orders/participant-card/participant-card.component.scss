@@ -1,0 +1,113 @@
+
+:host {
+  display: block;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e5e9e3;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 12px;
+  color: #202720;
+}
+
+.chip {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+
+.submitted {
+  background: #e6f5e9;
+  color: #08753b;
+}
+
+.pending {
+  background: #fff4d6;
+  color: #8a6000;
+}
+
+.items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0ec;
+}
+
+.item p {
+  margin: 0;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e7f3e9;
+  color: #137a42;
+}
+
+.name {
+  font-weight: 500;
+}
+
+.qty {
+  white-space: nowrap;
+  color: #69716b;
+}
+
+.price {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.empty {
+  padding: 12px 0;
+  color: #69716b;
+}
+
+.subtotal {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px 0 0;
+  font-weight: 600;
+}
+
+@media (max-width: 375px) {
+  .card {
+    padding: 12px;
+  }
+
+  .item {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+  }
+
+  .price {
+    grid-column: 2 / -1;
+    text-align: right;
+  }
+}
