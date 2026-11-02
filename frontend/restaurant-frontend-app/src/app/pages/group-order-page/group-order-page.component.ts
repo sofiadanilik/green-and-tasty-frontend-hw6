@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { forkJoin, switchMap } from 'rxjs';
+import { forkJoin, interval, switchMap } from 'rxjs';
 
 import { Participant } from '@app/models/group-orders/participant.model';
 import { GuestInvite } from '@app/models/reservations/guest-invite.model';
@@ -21,7 +21,11 @@ import { ParticipantCardComponent } from '@app/components/group-orders/participa
 
 @Component({
   selector: 'app-group-order-page',
-  imports: [CurrencyPipe, DatePipe, ParticipantCardComponent],
+  imports: [
+    CurrencyPipe,
+    DatePipe,
+    ParticipantCardComponent,
+  ],
   templateUrl: './group-order-page.component.html',
   styleUrl: './group-order-page.component.scss',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -30,6 +34,8 @@ export class GroupOrderPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly service = inject(GroupOrdersService);
   private readonly destroyRef = inject(DestroyRef);
+
+  private readonly syncIntervalMs = 15_000;
 
   readonly reservationId =
     this.route.snapshot.paramMap.get('reservationId') ?? '';
@@ -45,8 +51,12 @@ export class GroupOrderPageComponent implements OnInit {
   readonly confirmOpen = signal(false);
   readonly submitting = signal(false);
 
-  // Збираємо тільки підтверджені кошики.
-  // Однакові страви об'єднуємо за dish.id.
+  // Рівень 3: стан синхронізації.
+  readonly updatedAt = signal<Date | null>(null);
+  readonly refreshError = signal(false);
+  readonly refreshing = signal(false);
+
+  // Об'єднуємо однакові страви лише з підтверджених кошиків.
   readonly consolidated = computed(() => {
     type Dish = Participant['items'][number]['dish'];
 
@@ -77,7 +87,8 @@ export class GroupOrderPageComponent implements OnInit {
     const items = Array.from(dishes.values());
 
     const total = items.reduce(
-      (sum, item) => sum + item.dish.price * item.quantity,
+      (sum, item) =>
+        sum + item.dish.price * item.quantity,
       0
     );
 
@@ -85,11 +96,15 @@ export class GroupOrderPageComponent implements OnInit {
   });
 
   readonly pendingCount = computed(() =>
-    this.participants().filter((person) => !person.isSubmitted).length
+    this.participants().filter(
+      (person) => !person.isSubmitted
+    ).length
   );
 
   readonly hasDishes = computed(() =>
-    this.participants().some((person) => person.items.length > 0)
+    this.participants().some(
+      (person) => person.items.length > 0
+    )
   );
 
   readonly canSubmit = computed(() =>
@@ -98,14 +113,33 @@ export class GroupOrderPageComponent implements OnInit {
     !this.submitting()
   );
 
-  // Завантажуємо дані одразу після відкриття сторінки.
+  // Завантаження сторінки та автоматична синхронізація.
   ngOnInit(): void {
     this.load();
+
+    interval(this.syncIntervalMs)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        // Не надсилаємо нові запити після Submit,
+        // під час першого завантаження чи іншого оновлення.
+        if (
+          this.status() !== 'Open' ||
+          this.loading() ||
+          this.refreshing() ||
+          this.submitting()
+        ) {
+          return;
+        }
+
+        this.refresh();
+      });
   }
 
+  // Початкове завантаження.
   load(): void {
     this.loading.set(true);
     this.loadError.set(null);
+    this.refreshError.set(false);
     this.confirmOpen.set(false);
 
     this.service
@@ -134,6 +168,9 @@ export class GroupOrderPageComponent implements OnInit {
           this.participants.set(sessions.participants);
           this.ownerSessionId.set(ownerId);
           this.status.set(groupStatus.status);
+
+          this.updatedAt.set(new Date());
+          this.refreshError.set(false);
           this.loading.set(false);
         },
         error: (error: unknown) => {
@@ -141,8 +178,59 @@ export class GroupOrderPageComponent implements OnInit {
             error instanceof HttpErrorResponse &&
             error.status === 404;
 
-          this.loadError.set(notFound ? 'not-found' : 'other');
+          this.loadError.set(
+            notFound ? 'not-found' : 'other'
+          );
+
           this.loading.set(false);
+        },
+      });
+  }
+
+  // Рівень 3: ручне і фонове оновлення даних.
+  refresh(): void {
+    const groupId = this.groupId();
+
+    if (
+      !groupId ||
+      this.status() !== 'Open' ||
+      this.loading() ||
+      this.refreshing() ||
+      this.submitting()
+    ) {
+      return;
+    }
+
+    this.refreshing.set(true);
+    this.refreshError.set(false);
+
+    forkJoin({
+      sessions: this.service.getSessions$(
+        groupId,
+        { silent: true }
+      ),
+      groupStatus: this.service.getStatus$(
+        groupId,
+        { silent: true }
+      ),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ sessions, groupStatus }) => {
+          // Замінюємо дані лише після успішного
+          // отримання обох відповідей.
+          this.participants.set(sessions.participants);
+          this.status.set(groupStatus.status);
+
+          this.updatedAt.set(new Date());
+          this.refreshError.set(false);
+          this.refreshing.set(false);
+        },
+        error: () => {
+          // Не очищаємо учасників і страви.
+          // Показуємо помилку та залишаємо старі дані.
+          this.refreshError.set(true);
+          this.refreshing.set(false);
         },
       });
   }
@@ -164,21 +252,30 @@ export class GroupOrderPageComponent implements OnInit {
   }
 
   submitPreOrder(): void {
-    if (!this.confirmOpen() || !this.canSubmit()) {
+    if (
+      !this.confirmOpen() ||
+      !this.canSubmit()
+    ) {
       return;
     }
 
-    // Одразу блокуємо повторний клік.
+    // Захист від подвійного натискання.
     this.submitting.set(true);
 
     this.service
-      .submit$(this.groupId(), this.reservationId)
+      .submit$(
+        this.groupId(),
+        this.reservationId
+      )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.status.set('Submitted');
           this.confirmOpen.set(false);
           this.submitting.set(false);
+
+          // Після зміни статусу на Submitted
+          // фонові запити більше не виконуватимуться.
         },
         error: () => {
           this.confirmOpen.set(false);

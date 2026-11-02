@@ -7,6 +7,8 @@ import { Participant } from '@app/models/group-orders/participant.model';
 import { API_BASE_URL } from '@app/shared/config/api-base-url.token';
 
 import { GuestInvite } from '@app/models/reservations/guest-invite.model';
+import { HttpContext } from '@angular/common/http';
+import { SKIP_ERROR_TOAST } from '@app/auth/skip-error-toast.context';
 
 interface InviteTokenResponse {
   token: string;
@@ -61,11 +63,20 @@ getGroupInvite$(reservationId: string): Observable<GuestInvite> {
 
 
   // 2. Отримати учасників, страви та загальну суму
-  getSessions$(groupReservationId: string): Observable<GroupSessions> {
-    return this.http.get<GroupSessions>(
-      `${this.baseUrl}/guest/groups/${groupReservationId}/sessions`
-    );
+  getSessions$(
+  groupReservationId: string,
+  options?: { silent?: boolean }
+): Observable<GroupSessions> {
+   return this.http.get<GroupSessions>(
+  `${this.baseUrl}/guest/groups/${groupReservationId}/sessions`,
+  {
+    context: new HttpContext().set(
+      SKIP_ERROR_TOAST,
+      options?.silent === true
+    ),
   }
+);
+}
 
   // 3. Отримати ID власної сесії Owner
   getOwnerSessionId$(reservationId: string): Observable<string> {
@@ -77,11 +88,20 @@ getGroupInvite$(reservationId: string): Observable<GuestInvite> {
   }
 
   // 4. Отримати статус групового замовлення
-  getStatus$(groupReservationId: string): Observable<GroupStatus> {
+  getStatus$(
+  groupReservationId: string,
+  options?: { silent?: boolean }
+): Observable<GroupStatus> {
     return this.http.get<GroupStatus>(
-      `${this.baseUrl}/guest/groups/${groupReservationId}/status`
-    );
+  `${this.baseUrl}/guest/groups/${groupReservationId}/status`,
+  {
+    context: new HttpContext().set(
+      SKIP_ERROR_TOAST,
+      options?.silent === true
+    ),
   }
+);
+}
 
   // 5. Підтвердити спільне замовлення
   submit$(
