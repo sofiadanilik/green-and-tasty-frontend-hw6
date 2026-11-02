@@ -10,6 +10,7 @@ import { DishCardComponent } from '@app/shared/custom-components/dish-card/dish-
 import { MainCoverImageComponent } from '@app/shared/custom-components/main-cover-image/main-cover-image.component';
 import { ToastService } from '@app/services/toast/toast.service';
 import { GuestPreorderStore } from './state/guest-preorder.store';
+import { getDishImageUrl } from '@app/shared/helpers/dish-image.helpers';
 
 import { GuestNameModalComponent } from './ui/guest-name-modal/guest-name-modal.component';
 import { GuestCartDrawerComponent } from './ui/guest-cart-drawer/guest-cart-drawer.component';
@@ -125,7 +126,7 @@ export class GuestPreOrderPageComponent {
         return {
             id: dish.id,
             name: dish.name,
-            imageUrl: dish.imageUrl || 'assets/img/dish.png',
+            imageUrl: getDishImageUrl(dish.name, dish.imageUrl) ?? '',
             price: dish.price,
             state: dish.selectable ? dish.state : 'OutOfStock',
             weight: dish.weight ?? '',

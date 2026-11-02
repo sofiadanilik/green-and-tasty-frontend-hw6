@@ -110,6 +110,7 @@
             <app-participant-card
               [participant]="person"
               [isOwnerOrder]="person.id === ownerSessionId()"
+              [isFinalOrder]="person.id === ownerSessionId() && status() === 'Submitted'"
             />
           </li>
         }

@@ -39,6 +39,16 @@ describe('Практичне · картка учасника', () => {
 
       expect(fixture.nativeElement.querySelector('h2')?.textContent).toContain('My Pre-Order');
     });
+
+    it('після submit підписує збережений consolidated order як «Restaurant Order»', () => {
+      const fixture = TestBed.createComponent(ParticipantCardComponent);
+      fixture.componentRef.setInput('participant', OWNER);
+      fixture.componentRef.setInput('isOwnerOrder', true);
+      fixture.componentRef.setInput('isFinalOrder', true);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('h2')?.textContent).toContain('Restaurant Order');
+    });
   });
 
   describe('крок 3 · страви і Subtotal', () => {

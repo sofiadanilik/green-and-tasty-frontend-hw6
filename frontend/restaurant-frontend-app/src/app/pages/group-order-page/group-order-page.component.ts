@@ -71,7 +71,10 @@ export class GroupOrderPageComponent implements OnInit {
     >();
 
     for (const person of this.participants()) {
-      if (person.type !== 'Owner' && !person.isSubmitted) {
+      if (
+        person.type !== 'Owner' &&
+        (this.status() === 'Submitted' || !person.isSubmitted)
+      ) {
         continue;
       }
 

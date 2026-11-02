@@ -38,4 +38,15 @@ describe('DishCardComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('uses a neutral accessible fallback instead of a mismatched dish photo', () => {
+    fixture.componentRef.setInput('dish', { ...dish, imageUrl: '' });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('img')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.dish-image-placeholder')?.textContent.trim())
+      .toBe('K');
+    expect(fixture.nativeElement.querySelector('[role="img"]')?.getAttribute('aria-label'))
+      .toBe('Photo unavailable for Khachapuri');
+  });
 });

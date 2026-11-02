@@ -11,7 +11,17 @@
     @if (isUnavailable()) {
       <div class="status-badge">{{ dishStateLabel() }}</div>
     }
-    <img [src]="dish().imageUrl" alt="{{ dish().name }}" class="dish-image" />
+    @if (dish().imageUrl) {
+      <img [src]="dish().imageUrl" alt="{{ dish().name }}" class="dish-image" />
+    } @else {
+      <div
+        class="dish-image dish-image-placeholder"
+        role="img"
+        [attr.aria-label]="'Photo unavailable for ' + dish().name"
+      >
+        {{ dish().name.charAt(0) }}
+      </div>
+    }
     <div class="dish-info">
       <div class="dish-heading">
         <div class="dish-name">{{ dish().name }}</div>
@@ -28,4 +38,3 @@
     </div>
     <ng-content select="[dish-footer]"></ng-content>
   </div>
-

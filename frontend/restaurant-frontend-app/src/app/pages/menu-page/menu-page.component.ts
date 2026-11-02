@@ -10,6 +10,7 @@ import { DishSortingLabels, DishTypeLabels } from '@app/shared/mappers/dish-enum
 import { DishModalComponent } from '@app/components/dish-modal/dish-modal.component';
 import { PreOrdersService } from '@app/services/pre-orders/pre-orders.service';
 import {ToastService} from '@app/services/toast/toast.service';
+import { getDishImageUrl } from '@app/shared/helpers/dish-image.helpers';
 
 @Component({
   selector: 'app-menu-page',
@@ -81,7 +82,7 @@ export class MenuPageComponent implements OnInit {
     this.dishesService.getDishes(category, sort).subscribe((data) => {
       this.dishes = data.map((dish) => ({
         ...dish,
-        imageUrl: dish.imageUrl || 'assets/img/dish.png',
+        imageUrl: getDishImageUrl(dish.name, dish.imageUrl) ?? '',
         name: dish.name || 'Unknown Dish',
         price: dish.price || 0,
         weight: dish.weight || 'N/A',

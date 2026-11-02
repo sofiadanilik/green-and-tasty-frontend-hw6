@@ -188,6 +188,13 @@
       border-radius: 50%;
       object-fit: cover;
     }
+
+    .dish-image-placeholder {
+      display: grid;
+      place-items: center;
+      font-size: 2.5rem;
+    }
+
     .dish-info {
       display: flex;
       flex-direction: row;

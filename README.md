@@ -72,6 +72,30 @@ verification does not prove the deployed AWS/DynamoDB/Cognito path. The
 additive API Gateway route and CORS change has not been deployed; existing
 shared AWS resources were not modified.
 
+## Final verification status
+
+After Submit, a fresh local browser page was reloaded and verified against the
+backend: the final order remains **$43.00**, submitted guest dishes are not
+counted twice, and the Owner card is labeled **Restaurant Order**. Over the
+following 17 seconds, only the initial sessions request occurred; the earlier
+open-group run verified 15-second polling. The local fixture is in-memory and
+resets when the backend process restarts.
+
+The regular frontend was also opened against the existing shared API to check
+the home page, menu, and table-search form. No reservation was created
+and no AWS resources were modified. Dishes without an exact local image or a
+backend image URL now use a neutral initial placeholder instead of an
+unrelated photo.
+
+Screenshots:
+
+- [Owner review](./homework-design/local-e2e-owner-review.png)
+- [Submitted restaurant order](./homework-design/local-e2e-sent-to-restaurant.png)
+
+AI disclosure: AI assistance (Copilot) was used to inspect and update the
+frontend and to run/interpret local validation. The checks below are the
+observed results; the submitter should perform a final review before submission.
+
 ## Validation
 
 Run the homework tests and production build:
@@ -89,11 +113,11 @@ Backend tests (from the Backend checkout):
 dotnet test .\restaurant-backend-app.sln
 ```
 
-Latest run: **81/81** Homework #6 frontend tests passed. The previous saved
-verification recorded **162/162** Backend tests, application and spec
-TypeScript checks, and the production build passing. Existing
-bundle/style-size, CommonJS, and NuGet dependency vulnerability warnings
-remain.
+Latest run: **86/86** Homework #6 frontend tests passed; the targeted dish-card
+test passed **2/2**. Application and spec TypeScript checks passed, and the
+production build passed with a placeholder backend URL (no AWS deployment or
+request). Backend tests passed **162/162**. Existing bundle/style-size,
+CommonJS, and NuGet dependency vulnerability warnings remain.
 
 ## Homework references
 

@@ -125,6 +125,25 @@ describe('Рівень 2 · сторінка Owner Review', () => {
       expect(text).not.toContain('$760.00');
     });
 
+    it('після перезавантаження Submitted не додає guest carts вдруге до збереженого order', () => {
+      const submittedOrder = structuredClone(OWNER_ORDER);
+      submittedOrder.orderItems[0].quantity = 3;
+      service.getOwnerPreOrder$.and.returnValue(of(submittedOrder));
+      service.getStatus$.and.returnValue(of({
+        currentParticipants: 3,
+        maxCapacity: 5,
+        status: 'Submitted',
+      }));
+
+      const { element } = create();
+      const text = element.textContent ?? '';
+
+      expect(text).toContain('$540.00');
+      expect(text).not.toContain('$900.00');
+      expect(buttonByText(element, 'Submit Pre-Order')?.disabled).toBeTrue();
+      expect(text).toContain('Restaurant Order');
+    });
+
     it('однакові страви — одним рядком: «Caesar Salad × 3»', () => {
       expect(create().element.textContent).toContain('Caesar Salad × 3');
     });

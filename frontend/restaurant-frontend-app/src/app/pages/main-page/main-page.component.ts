@@ -21,6 +21,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs/operators';
 
 import { LoginModalComponent } from '@app/auth/components/login/login-modal/login-modal.component';
+import { getDishImageUrl } from '@app/shared/helpers/dish-image.helpers';
 
 @Component({
   selector: 'app-main-page',
@@ -85,7 +86,7 @@ export class MainPageComponent implements OnInit {
     this.dishesService.getPopularDishes().subscribe((data) => {
       this.dishes = data.slice(0, 4).map((dish) => ({
         ...dish,
-        imageUrl: dish.imageUrl || 'assets/img/dish.png',
+        imageUrl: getDishImageUrl(dish.name, dish.imageUrl) ?? '',
         name: dish.name || 'Unknown Dish',
         price: dish.price || 0,
         weight: dish.weight || 'N/A',
