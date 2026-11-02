@@ -22,13 +22,15 @@ describe('Рівень 2 · GroupOrdersService', () => {
 
   afterEach(() => http.verify());
 
-  it('getGroupInvite$: reservationId → invite-token → invite', () => {
+  it('getOwnerGroup$: uses the authenticated Owner endpoint, not guest invite lookup', () => {
     let groupId = '';
-    service.getGroupInvite$('res-1').subscribe((invite) => (groupId = invite.GroupReservationId));
+    service.getOwnerGroup$('res-1').subscribe((invite) => (groupId = invite.GroupReservationId));
 
-    http.expectOne(`${BASE_URL}/reservations/res-1/invite-token`).flush({ token: 'tok' });
-    http.expectOne(`${BASE_URL}/guest/invites/tok`).flush({ GroupReservationId: 'grp-1' });
-
+    const request = http.expectOne(`${BASE_URL}/reservations/res-1/group-order`);
+    expect(request.request.method).toBe('GET');
+    request.flush({ GroupReservationId: 'grp-1' });
+    http.expectNone(`${BASE_URL}/reservations/res-1/invite-token`);
+    http.expectNone(`${BASE_URL}/guest/invites/tok`);
     expect(groupId).toBe('grp-1');
   });
 

@@ -1,18 +1,13 @@
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { map, Observable, switchMap } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 import { Participant } from '@app/models/group-orders/participant.model';
+import { GroupReservationDetails } from '@app/models/reservations/guest-invite.model';
 import { API_BASE_URL } from '@app/shared/config/api-base-url.token';
 
-import { GuestInvite } from '@app/models/reservations/guest-invite.model';
-import { HttpContext } from '@angular/common/http';
 import { SKIP_ERROR_TOAST } from '@app/auth/skip-error-toast.context';
-
-interface InviteTokenResponse {
-  token: string;
-}
 
 export interface GroupInvite {
   GroupReservationId: string;
@@ -45,21 +40,12 @@ export class GroupOrdersService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(API_BASE_URL).replace(/\/$/, '');
 
-  // 1. Отримати запрошення за reservationId
-
-getGroupInvite$(reservationId: string): Observable<GuestInvite> {
-  return this.http
-    .get<InviteTokenResponse>(
-      `${this.baseUrl}/reservations/${reservationId}/invite-token`
-    )
-    .pipe(
-      switchMap((response) =>
-        this.http.get<GuestInvite>(
-          `${this.baseUrl}/guest/invites/${response.token}`
-        )
-      )
+  // Load group details through the authenticated Owner endpoint.
+  getOwnerGroup$(reservationId: string): Observable<GroupReservationDetails> {
+    return this.http.get<GroupReservationDetails>(
+      `${this.baseUrl}/reservations/${reservationId}/group-order`
     );
-}
+  }
 
 
   // 2. Отримати учасників, страви та загальну суму

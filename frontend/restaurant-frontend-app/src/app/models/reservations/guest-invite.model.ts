@@ -1,4 +1,4 @@
-export interface GuestInvite {
+export interface GroupReservationDetails {
   GroupReservationId: string;
   LocationId: string;
   RestaurantName: string;
@@ -9,6 +9,8 @@ export interface GuestInvite {
   TableNumber: number;
   InviterName: string;
 }
+
+export type GuestInvite = GroupReservationDetails;
 
 export interface GroupInviteToken {
   token: string;

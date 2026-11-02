@@ -52,9 +52,9 @@ describe('Рівень 2 · сторінка Owner Review', () => {
 
   beforeEach(() => {
     service = jasmine.createSpyObj<GroupOrdersService>('GroupOrdersService', [
-      'getGroupInvite$', 'getSessions$', 'getOwnerSessionId$', 'getStatus$', 'submit$',
+      'getOwnerGroup$', 'getSessions$', 'getOwnerSessionId$', 'getStatus$', 'submit$',
     ]);
-    service.getGroupInvite$.and.returnValue(of(INVITE));
+    service.getOwnerGroup$.and.returnValue(of(INVITE));
     service.getSessions$.and.returnValue(of(structuredClone(SESSIONS)));
     service.getOwnerSessionId$.and.returnValue(of('owner'));
     service.getStatus$.and.returnValue(of({ currentParticipants: 3, maxCapacity: 5, status: 'Open' as const }));
@@ -63,7 +63,7 @@ describe('Рівень 2 · сторінка Owner Review', () => {
   describe('дані', () => {
     it('бере reservationId з адреси і вантажить групу за GroupReservationId', () => {
       create();
-      expect(service.getGroupInvite$).toHaveBeenCalledWith('res-1');
+      expect(service.getOwnerGroup$).toHaveBeenCalledWith('res-1');
       expect(service.getSessions$.calls.mostRecent().args[0]).toBe('grp-1');
     });
 
@@ -104,16 +104,16 @@ describe('Рівень 2 · сторінка Owner Review', () => {
     });
 
     it('404: «Group reservation not found»', () => {
-      service.getGroupInvite$.and.returnValue(throwError(() => new HttpErrorResponse({ status: 404 })));
+      service.getOwnerGroup$.and.returnValue(throwError(() => new HttpErrorResponse({ status: 404 })));
       expect(create().element.textContent).toContain('Group reservation not found');
     });
 
     it('інша помилка: кнопка «Try again» вантажить ще раз', () => {
-      service.getGroupInvite$.and.returnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
+      service.getOwnerGroup$.and.returnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
       const { fixture, element } = create();
       buttonByText(element, 'Try again')?.click();
       fixture.detectChanges();
-      expect(service.getGroupInvite$).toHaveBeenCalledTimes(2);
+      expect(service.getOwnerGroup$).toHaveBeenCalledTimes(2);
     });
   });
 

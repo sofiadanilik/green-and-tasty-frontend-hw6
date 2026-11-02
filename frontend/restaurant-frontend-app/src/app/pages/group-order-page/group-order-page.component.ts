@@ -15,7 +15,7 @@ import { ActivatedRoute } from '@angular/router';
 import { forkJoin, interval, switchMap } from 'rxjs';
 
 import { Participant } from '@app/models/group-orders/participant.model';
-import { GuestInvite } from '@app/models/reservations/guest-invite.model';
+import { GroupReservationDetails } from '@app/models/reservations/guest-invite.model';
 import { GroupOrdersService } from '@app/services/group-orders/group-orders.service';
 import { ParticipantCardComponent } from '@app/components/group-orders/participant-card/participant-card.component';
 
@@ -40,7 +40,7 @@ export class GroupOrderPageComponent implements OnInit {
   readonly reservationId =
     this.route.snapshot.paramMap.get('reservationId') ?? '';
 
-  readonly invite = signal<GuestInvite | null>(null);
+  readonly groupDetails = signal<GroupReservationDetails | null>(null);
   readonly groupId = signal('');
   readonly ownerSessionId = signal('');
   readonly participants = signal<Participant[]>([]);
@@ -143,10 +143,10 @@ export class GroupOrderPageComponent implements OnInit {
     this.confirmOpen.set(false);
 
     this.service
-      .getGroupInvite$(this.reservationId)
+      .getOwnerGroup$(this.reservationId)
       .pipe(
         switchMap((invite) => {
-          this.invite.set(invite);
+          this.groupDetails.set(invite);
           this.groupId.set(invite.GroupReservationId);
 
           return forkJoin({
