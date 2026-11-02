@@ -2,6 +2,7 @@ import { Participant } from '@app/models/group-orders/participant.model';
 import { GroupSessionsResponse } from '@app/models/group-orders/group-sessions-response.model';
 import { GroupReservationStatus, GroupStatusResponse } from '@app/models/group-orders/group-status.model';
 import { SubmittedDish } from '@app/models/group-orders/submit-group-pre-order.model';
+import { Order } from '@app/models/orders/order.model';
 import { GuestInvite } from '@app/models/reservations/guest-invite.model';
 
 /**
@@ -66,6 +67,36 @@ export class GroupOrdersMockStore {
   snapshot(): GroupSessionsResponse {
     const participants = this.participants.map((p) => structuredClone({ ...p, total: sum(p) }));
     return { participants, total: participants.reduce((acc, p) => acc + p.total, 0) };
+  }
+
+  ownerPreOrder(): Order {
+    const owner = this.participants.find((participant) => participant.id === DEMO_OWNER_SESSION_ID);
+    if (!owner) throw new Error('Demo owner session is missing.');
+
+    return {
+      orderId: 'demo-order',
+      reservationAddress: DEMO_INVITE.LocationAddress,
+      reservationTime: DEMO_INVITE.StartTime,
+      reservationId: DEMO_RESERVATION_ID,
+      orderItems: owner.items.map(({ dish, quantity }) => ({
+        dish: {
+          ...dish,
+          imageUrl: dish.imageUrl ?? '',
+          state: 'Available',
+          weight: dish.weight ?? '',
+          dishType: '',
+          description: '',
+          calories: '',
+          proteins: '',
+          carbohydrates: '',
+          fats: '',
+          vitamins: '',
+        },
+        quantity,
+        state: 0,
+      })),
+      status: 0,
+    };
   }
 
   groupStatus(): GroupStatusResponse {

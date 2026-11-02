@@ -34,11 +34,43 @@ describe('Рівень 2 · GroupOrdersService', () => {
     expect(groupId).toBe('grp-1');
   });
 
+  it('getOwnerPreOrder$: loads the Owner cart from the existing order endpoint', () => {
+    let orderId = '';
+    service.getOwnerPreOrder$('res-1').subscribe((order) => (orderId = order.orderId));
+
+    const request = http.expectOne(`${BASE_URL}/orders/res-1`);
+    expect(request.request.method).toBe('GET');
+    request.flush({ orderId: 'order-1', reservationId: 'res-1', orderItems: [] });
+    expect(orderId).toBe('order-1');
+  });
+
   it('getSessions$: GET /guest/groups/{id}/sessions', () => {
-    service.getSessions$('grp-1').subscribe();
+    let response: unknown;
+    service.getSessions$('grp-1').subscribe((value) => (response = value));
     const req = http.expectOne(`${BASE_URL}/guest/groups/grp-1/sessions`);
     expect(req.request.method).toBe('GET');
-    req.flush({ participants: [], total: 0 });
+    req.flush({
+      participants: [{
+        id: 'session-1',
+        type: 'Guest',
+        name: 'Olena',
+        items: [{ dish: { id: 'dish-1', name: 'Spring Salad', price: 12 }, quantity: 2 }],
+        total: 24,
+        isSubmitted: true,
+      }],
+      total: 24,
+    });
+    expect(response).toEqual({
+      participants: [{
+        id: 'session-1',
+        type: 'Guest',
+        name: 'Olena',
+        items: [{ dish: { id: 'dish-1', name: 'Spring Salad', price: 12 }, quantity: 2 }],
+        total: 24,
+        isSubmitted: true,
+      }],
+      total: 24,
+    });
   });
 
   it('getOwnerSessionId$: повертає рядок guestSessionId', () => {

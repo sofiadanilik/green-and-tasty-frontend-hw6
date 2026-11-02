@@ -126,13 +126,15 @@ export class GuestPreorderStore {
     }
 
     async join(name: string) {
+        if (this.joinLoading()) return;
+
         const inv = this.invite();
         if (!inv) {
             this.joinError.set('Invite is not loaded yet');
             return;
         }
 
-        this.setGuestName(name);
+        const guestName = name.trim();
 
         const groupReservationId = inv.GroupReservationId;
         if (!groupReservationId) {
@@ -140,23 +142,19 @@ export class GuestPreorderStore {
             return;
         }
 
-        const payload = {
-            groupReservationId,
-            guestName: this.guestName(),
-        };
-
-        console.log('[join payload]', payload);
-
         this.joinLoading.set(true);
         this.joinError.set(null);
 
         try {
-            const res = await firstValueFrom(this.guestSessionsService.createSession(payload));
+            const res = await firstValueFrom(this.guestSessionsService.createSession({
+                groupReservationId,
+                guestName,
+            }));
             this.guestSessionId.set(res.SessionId);
             this.guestSessionToken.set(res.SessionToken);
+            this.setGuestName(guestName);
             await this.loadMenu();
-        } catch (e) {
-            console.log('[join error]', e);
+        } catch {
             this.joinError.set('Failed to join session');
         } finally {
             this.joinLoading.set(false);
@@ -210,12 +208,8 @@ export class GuestPreorderStore {
 
         try {
             const res = await firstValueFrom(this.guestSessionsService.getMenu(id, token));
-            console.log('[menu response]', res);
-            console.log('[menu dishes keys]', Object.keys(res.dishes ?? {}));
-
             this.menuByCategory.set(res.dishes ?? {});
-        } catch (e) {
-            console.log('[menu error]', e);
+        } catch {
             this.menuError.set('Failed to load menu');
             this.menuByCategory.set({});
         } finally {

@@ -72,6 +72,17 @@
                   "with": "src/environments/environment.development.ts"
                 }
               ]
+            },
+            "local-e2e": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.local-e2e.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -84,6 +95,9 @@
             },
             "development": {
               "buildTarget": "restaurant-frontend-app:build:development"
+            },
+            "local-e2e": {
+              "buildTarget": "restaurant-frontend-app:build:local-e2e"
             }
           },
           "defaultConfiguration": "development"

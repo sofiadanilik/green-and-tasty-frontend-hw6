@@ -20,16 +20,20 @@
     <div class="field">
         <label class="field-label" for="guestName">Enter Your Name</label>
         <input id="guestName" type="text" placeholder="e.g. Jonson D." [(ngModel)]="name" (blur)="touched.set(true)"
+            [disabled]="loading()"
             (keydown.enter)="submit()" autocomplete="name" />
         @if (touched() && !valid()) {
         <div class="error">Name is required</div>
+        }
+        @if (error()) {
+        <div class="error" role="alert">{{ error() }}</div>
         }
     </div>
 
     <div modal-actions class="actions">
         <app-custom-button type="button" variant="primary" size="extra-large" fullWidth
-            [disabled]="!valid() || !invite()" (click)="submit()">
-            Browse Menu
+            [disabled]="!valid() || !invite() || loading()" (click)="submit()">
+            {{ loading() ? 'Joining...' : 'Browse Menu' }}
         </app-custom-button>
     </div>
 </app-modal>

@@ -167,8 +167,22 @@
             class="button button--primary button--large"
             (click)="onPreOrder()"
           >
-            Pre-order
+            @if (r().guestCount >= 2) {
+              My Pre-Order
+            } @else {
+              Pre-order
+            }
           </button>
+
+          @if (r().guestCount >= 2) {
+            <button
+              type="button"
+              class="button button--secondary button--large"
+              (click)="onGroupPreOrder()"
+            >
+              Group Pre-Order
+            </button>
+          }
         }
       }
 
@@ -191,6 +205,16 @@
             (click)="onPreOrderWaiter()"
           >
             Pre-order
+          </button>
+        }
+
+        @if (role() === Roles.CUSTOMER && r().guestCount >= 2) {
+          <button
+            type="button"
+            class="button button--secondary button--large"
+            (click)="onGroupPreOrder()"
+          >
+            Group Pre-Order
           </button>
         }
       }

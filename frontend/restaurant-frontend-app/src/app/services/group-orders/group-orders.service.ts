@@ -4,6 +4,7 @@ import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
 import { Participant } from '@app/models/group-orders/participant.model';
+import { Order } from '@app/models/orders/order.model';
 import { GroupReservationDetails } from '@app/models/reservations/guest-invite.model';
 import { API_BASE_URL } from '@app/shared/config/api-base-url.token';
 
@@ -44,6 +45,21 @@ export class GroupOrdersService {
   getOwnerGroup$(reservationId: string): Observable<GroupReservationDetails> {
     return this.http.get<GroupReservationDetails>(
       `${this.baseUrl}/reservations/${reservationId}/group-order`
+    );
+  }
+
+  getOwnerPreOrder$(
+    reservationId: string,
+    options?: { silent?: boolean }
+  ): Observable<Order> {
+    return this.http.get<Order>(
+      `${this.baseUrl}/orders/${reservationId}`,
+      {
+        context: new HttpContext().set(
+          SKIP_ERROR_TOAST,
+          options?.silent === true
+        ),
+      }
     );
   }
 

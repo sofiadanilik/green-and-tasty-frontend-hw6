@@ -4,12 +4,13 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:e2e": "ng serve --configuration local-e2e --host 127.0.0.1",
     "prebuild": "node scripts/set-env.mjs",
     "build": "ng build",
     "postbuild": "node scripts/check-bundle.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:hw": "ng test --watch=false --include src/app/components/group-orders --include src/app/pages/group-order-page --include src/app/services/group-orders --include src/app/shared/helpers",
+    "test:hw": "ng test --watch=false --include src/app/auth/token.interceptor.spec.ts --include src/app/components/group-orders --include src/app/components/reservations/card-reservation --include src/app/pages/group-order-page --include src/app/pages/guest-pre-order-page/state --include src/app/services/group-orders --include src/app/services/guest-sessions --include src/app/shared/helpers",
     "lint": "ng lint",
     "lint-fix": "ng lint --fix",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\""

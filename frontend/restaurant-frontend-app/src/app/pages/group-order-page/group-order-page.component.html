@@ -1,21 +1,45 @@
 <main class="group-order-page">
   <section class="group-order-container">
     @if (loading()) {
-      <p role="status">Loading group pre-order...</p>
+      <div class="page-state page-state--loading" role="status">
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <p>Loading group pre-order...</p>
+      </div>
     } @else if (loadError() === 'not-found') {
-      <h1>Group reservation not found</h1>
+      <div class="page-state" role="alert">
+        <h1>Group reservation not found</h1>
+        <button type="button" class="retry-button" (click)="load()">Try again</button>
+      </div>
     } @else if (loadError() === 'other') {
-      <h1>Could not load group pre-order</h1>
-
-      <button type="button" (click)="load()">Try again</button>
+      <div class="page-state" role="alert">
+        <h1>Could not load group pre-order</h1>
+        <p>Please check your connection and try again.</p>
+        <button type="button" class="retry-button" (click)="load()">Try again</button>
+      </div>
     } @else {
       <header class="page-header">
-        <h1>Group Pre-Order</h1>
+        <div class="title-row">
+          <h1>Group Pre-Order</h1>
+          <span
+            class="status-badge"
+            [class.submitted]="status() === 'Submitted'"
+            [class.closed]="status() === 'Closed'"
+          >
+            @if (status() === 'Open') {
+              Collecting pre-orders
+            } @else if (status() === 'Submitted') {
+              Sent to Restaurant
+            } @else {
+              Closed
+            }
+          </span>
+        </div>
 
-        <!-- РІВЕНЬ 3: час синхронізації та ручне оновлення -->
         <div class="refresh-bar">
           @if (updatedAt()) {
-            <span class="last-updated"> Updated at {{ updatedAt() | date: 'HH:mm:ss' }} </span>
+            <span class="last-updated">
+              Updated at {{ updatedAt() | date: 'HH:mm:ss' }}
+            </span>
           }
 
           @if (status() === 'Open') {
@@ -30,52 +54,45 @@
           }
         </div>
 
-        <!-- РІВЕНЬ 3: помилка фонового оновлення -->
         @if (refreshError()) {
           <p class="refresh-error" role="status">
-            Couldn't refresh. Showing the last available data.
+            Couldn't refresh. Showing data from {{ updatedAt() | date: 'HH:mm:ss' }}.
           </p>
         }
 
-        <span class="status-badge">
-          @if (status() === 'Open') {
-            Collecting pre-orders
-          } @else if (status() === 'Submitted') {
-            Sent to Restaurant
-          } @else {
-            Closed
-          }
-        </span>
-
         @if (groupDetails(); as details) {
-          <div class="reservation-details">
-            <span>
+          <ul class="reservation-details">
+            <li>
+              <img src="assets/svg/location-green.svg" alt="" aria-hidden="true" />
               {{ details.LocationAddress }}
-            </span>
+            </li>
 
-            <span>
+            <li>
+              <img src="assets/svg/calendar-green.svg" alt="" aria-hidden="true" />
               {{ details.StartTime | date: 'MMM d, y' : 'UTC' }}
-            </span>
+            </li>
 
-            <span>
+            <li>
+              <img src="assets/svg/clock-green.svg" alt="" aria-hidden="true" />
               {{ details.StartTime | date: 'HH:mm' : 'UTC' }}
               -
               {{ details.EndTime | date: 'HH:mm' : 'UTC' }}
-            </span>
+            </li>
 
-            <span>
+            <li>
+              <img src="assets/svg/people-green.svg" alt="" aria-hidden="true" />
               {{ participants().length }}
               of
               {{ details.MaxGuestCount }}
               guests
-            </span>
-          </div>
+            </li>
+          </ul>
         }
       </header>
 
-      <!-- Попередження про непідтверджені замовлення -->
       @if (pendingCount() > 0 && status() === 'Open') {
         <p class="pending-notice" role="status">
+          <img src="assets/svg/bell-regular.svg" alt="" aria-hidden="true" />
           {{ pendingCount() }}
           participant{{ pendingCount() === 1 ? '' : 's' }}
           {{ pendingCount() === 1 ? "hasn't" : "haven't" }}
@@ -83,25 +100,21 @@
         </p>
       }
 
-      <!-- Порожній список страв -->
       @if (!hasDishes()) {
         <p class="empty-message">Participants haven't added any dishes yet</p>
       }
 
-      <!-- Учасники групового замовлення -->
       <ul class="participants">
         @for (person of participants(); track person.id) {
           <li>
-            @if (person.id === ownerSessionId()) {
-              <h2 class="my-order-heading">My Pre-Order</h2>
-            }
-
-            <app-participant-card [participant]="person" />
+            <app-participant-card
+              [participant]="person"
+              [isOwnerOrder]="person.id === ownerSessionId()"
+            />
           </li>
         }
       </ul>
 
-      <!-- Консолідоване замовлення -->
       <section class="consolidated-order">
         <h2>Consolidated pre-order</h2>
 
@@ -122,7 +135,6 @@
         }
       </section>
 
-      <!-- Загальна сума лише підтверджених кошиків -->
       <footer class="total-section">
         <span>Grand Total</span>
 
@@ -131,12 +143,11 @@
         </strong>
       </footer>
 
-      <!-- Підтвердження замовлення -->
-      @if (status() === 'Open') {
+      @if (status() !== 'Closed') {
         <button
           type="button"
           class="submit-button"
-          [disabled]="!canSubmit()"
+          [disabled]="status() !== 'Open' || !canSubmit()"
           (click)="openConfirmation()"
         >
           Submit Pre-Order
@@ -145,32 +156,36 @@
     }
   </section>
 
-  <!-- Модальне вікно підтвердження -->
   @if (confirmOpen()) {
-    <div class="modal-backdrop">
-      <div
-        class="confirmation-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Submit Pre-Order"
-      >
-        <h2>Submit Pre-Order</h2>
+    <app-modal
+      [title]="'Submit Pre-Order'"
+      [width]="'520px'"
+      [closeOnBackdrop]="false"
+      (closed)="closeConfirmation()"
+    >
+      <p class="confirmation-copy">
+        Submit the consolidated pre-order to the restaurant? Only submitted participant carts will
+        be included.
+      </p>
 
-        <p>
-          Submit the consolidated pre-order to the restaurant? Only submitted participant carts will
-          be included.
-        </p>
-
-        <div class="dialog-actions">
-          <button type="button" [disabled]="submitting()" (click)="closeConfirmation()">
-            Cancel
-          </button>
-
-          <button type="button" [disabled]="submitting()" (click)="submitPreOrder()">
-            {{ submitting() ? 'Submitting…' : 'Submit' }}
-          </button>
-        </div>
+      <div class="dialog-actions" modal-actions>
+        <button
+          type="button"
+          class="dialog-cancel"
+          [disabled]="submitting()"
+          (click)="closeConfirmation()"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="dialog-submit"
+          [disabled]="submitting()"
+          (click)="submitPreOrder()"
+        >
+          {{ submitting() ? 'Submitting…' : 'Submit' }}
+        </button>
       </div>
-    </div>
+    </app-modal>
   }
 </main>

@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { GroupOrdersService } from '@app/services/group-orders/group-orders.service';
+import { Order } from '@app/models/orders/order.model';
 import { ToastService } from '@app/services/toast/toast.service';
 import { GroupSessionsResponse } from '@app/models/group-orders/group-sessions-response.model';
 import { GuestInvite } from '@app/models/reservations/guest-invite.model';
@@ -22,6 +23,34 @@ const SESSIONS: GroupSessionsResponse = {
 };
 const INVITE = { GroupReservationId: 'grp-1', LocationAddress: 'Rustaveli Avenue 48', MaxGuestCount: 5,
   StartTime: '2026-10-21T16:00:00Z', EndTime: '2026-10-21T17:30:00Z' } as GuestInvite;
+const OWNER_ORDER: Order = {
+  orderId: 'order-1',
+  reservationAddress: 'Rustaveli Avenue 48',
+  reservationTime: '2026-10-21T16:00:00Z',
+  reservationId: 'res-1',
+  orderItems: [
+    {
+      dish: {
+        id: 'dish1',
+        name: 'Caesar Salad',
+        imageUrl: '',
+        price: 180,
+        state: 'Available',
+        weight: '',
+        dishType: '',
+        description: '',
+        calories: '',
+        proteins: '',
+        carbohydrates: '',
+        fats: '',
+        vitamins: '',
+      },
+      quantity: 1,
+      state: 0,
+    },
+  ],
+  status: 0,
+};
 
 function buttonByText(root: ParentNode, text: string): HTMLButtonElement | undefined {
   return [...root.querySelectorAll('button')].find((b) => b.textContent?.trim() === text) as HTMLButtonElement | undefined;
@@ -46,9 +75,10 @@ describe('Рівень 3 · синхронізація', () => {
 
   beforeEach(() => {
     service = jasmine.createSpyObj<GroupOrdersService>('GroupOrdersService', [
-      'getOwnerGroup$', 'getSessions$', 'getOwnerSessionId$', 'getStatus$', 'submit$',
+      'getOwnerGroup$', 'getOwnerPreOrder$', 'getSessions$', 'getOwnerSessionId$', 'getStatus$', 'submit$',
     ]);
     service.getOwnerGroup$.and.returnValue(of(INVITE));
+    service.getOwnerPreOrder$.and.returnValue(of(structuredClone(OWNER_ORDER)));
     service.getSessions$.and.returnValue(of(structuredClone(SESSIONS)));
     service.getOwnerSessionId$.and.returnValue(of('owner'));
     service.getStatus$.and.returnValue(of({ currentParticipants: 2, maxCapacity: 5, status: 'Open' as const }));
@@ -98,6 +128,9 @@ describe('Рівень 3 · синхронізація', () => {
 
   it('після Submit синхронізація зупиняється', fakeAsync(() => {
     service.submit$.and.returnValue(of([{ dishId: 'dish1', quantity: 1 }]));
+    const submittedSessions = structuredClone(SESSIONS);
+    submittedSessions.participants[1].isSubmitted = true;
+    service.getSessions$.and.returnValue(of(submittedSessions));
     const { fixture, element } = create();
     buttonByText(element, 'Submit Pre-Order')?.click();
     fixture.detectChanges();

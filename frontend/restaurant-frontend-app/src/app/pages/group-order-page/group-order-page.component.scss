@@ -1,36 +1,115 @@
-
 @use '../../shared/styles/abstracts/colors' as color;
-
 
 .group-order-page {
   min-height: 100vh;
-  background: color.$bg-yellow;
+  background: color.$neutral-100;
   padding: 32px 16px;
 }
 
 .group-order-container {
+  box-sizing: border-box;
   width: 100%;
-  max-width: 800px;
+  max-width: 860px;
   margin: 0 auto;
-  padding: 24px;
-  border-radius: 16px;
+  padding: 40px;
+  border: 1px solid color.$neutral-0;
+  border-radius: 22px;
+  background: color.$neutral-100;
+  box-shadow: 0 2px 12px rgb(35 35 35 / 8%);
+}
+
+.page-state {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  min-height: 220px;
+  align-content: center;
+  text-align: center;
+}
+
+.page-state h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.35;
+}
+
+.page-state p {
+  color: color.$neutral-600;
+}
+
+.page-state--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+}
+
+.loading-spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid color.$green-150;
+  border-top-color: color.$green-600;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.retry-button {
+  padding: 10px 24px;
+  border: 1px solid color.$green-600;
+  border-radius: 8px;
   background: color.$neutral-0;
+  color: color.$green-600;
+  font: inherit;
+  cursor: pointer;
 }
 
 .page-header {
-  margin-bottom: 24px;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid color.$green-100;
 }
 
-.page-header h1 {
-  margin: 0 0 16px;
-  font-size: 28px;
+.title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.title-row h1 {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.35;
 }
 
 .reservation-details {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  align-items: center;
+  gap: 16px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
   color: color.$neutral-600;
+}
+
+.reservation-details li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.reservation-details img {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
 }
 
 .participants {
@@ -46,44 +125,111 @@
 .total-section {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 16px;
-  padding-top: 20px;
-  border-top: 1px solid color.$neutral-200;
-  font-size: 20px;
+  padding: 18px 0 0;
+  border-top: 1px solid color.$green-150;
+  font-size: 26px;
+  font-weight: 500;
 }
 
 .total-section strong {
   color: color.$green-600;
+  font-size: 28px;
+  font-weight: 600;
 }
 
-@media (max-width: 375px) {
+.last-updated {
+  color: color.$neutral-600;
+  font-size: 13px;
+}
+
+.refresh-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+
+.refresh-button {
+  border: 1px solid color.$green-600;
+  border-radius: 6px;
+  background: transparent;
+  color: color.$green-600;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.refresh-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.refresh-error {
+  margin: 8px 0 0;
+  color: #8a6000;
+  font-size: 13px;
+  text-align: right;
+}
+
+@media (max-width: 600px) {
+  .group-order-page {
+    padding: 12px;
+  }
+
   .group-order-container {
     padding: 16px;
+    border-radius: 16px;
+  }
+
+  .title-row h1 {
+    font-size: 22px;
   }
 
   .reservation-details {
+    align-items: flex-start;
+    gap: 8px 12px;
+  }
+
+  .page-state--loading {
     flex-direction: column;
-    gap: 8px;
   }
 }
 
 .pending-notice {
-  background: #fff8e1;
-  color: #765300;
-  border: 1px solid #f5e5ad;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: color.$orange-30;
+  color: color.$orange-600;
+  border: 1px solid color.$orange-100;
   border-radius: 10px;
   padding: 14px 16px;
   margin: 20px 0;
 }
 
+.pending-notice img {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+}
+
 .consolidated-order {
   margin-top: 24px;
+  padding: 20px;
+  border-radius: 12px;
+  background: color.$neutral-100;
+}
+
+.consolidated-order h2 {
+  margin: 0;
+  font-size: 20px;
 }
 
 .consolidated-order ul {
   list-style: none;
   padding: 0;
-  margin: 12px 0;
+  margin: 12px 0 0;
 }
 
 .consolidated-order li {
@@ -91,17 +237,17 @@
   justify-content: space-between;
   gap: 12px;
   padding: 10px 0;
-  border-bottom: 1px solid #edf0eb;
+  border-bottom: 1px solid color.$neutral-200;
 }
 
 .submit-button {
   display: block;
   width: 100%;
-  margin-top: 20px;
-  padding: 14px 20px;
+  margin-top: 16px;
+  padding: 16px 20px;
   border: none;
   border-radius: 8px;
-  background: #08783b;
+  background: color.$green-600;
   color: white;
   font-size: 16px;
   font-weight: 600;
@@ -109,48 +255,58 @@
 }
 
 .submit-button:disabled {
-  background: #c7cfca;
+  background: color.$neutral-400;
   cursor: not-allowed;
 }
 
 .status-badge {
   display: inline-block;
-  margin: 10px 0;
   padding: 6px 12px;
   border-radius: 20px;
-  background: #e5f4e8;
-  color: #08783b;
+  background: color.$green-100;
+  color: color.$green-600;
   font-size: 13px;
 }
 
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgb(0 0 0 / 45%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
+.status-badge.submitted {
+  background: color.$orange-30;
+  color: color.$orange-600;
 }
 
-.confirmation-dialog {
-  width: 100%;
-  max-width: 440px;
-  padding: 24px;
-  border-radius: 16px;
-  background: white;
+.status-badge.closed {
+  background: color.$neutral-200;
+  color: color.$neutral-600;
+}
+
+.confirmation-copy {
+  margin: 0;
 }
 
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 24px;
 }
 
 .dialog-actions button {
   padding: 10px 18px;
   border-radius: 8px;
   cursor: pointer;
+  font: inherit;
+}
+
+.dialog-cancel {
+  border: 1px solid color.$neutral-200;
+  background: color.$neutral-0;
+}
+
+.dialog-submit {
+  border: 1px solid color.$green-600;
+  background: color.$green-600;
+  color: color.$neutral-0;
+}
+
+.dialog-actions button:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }

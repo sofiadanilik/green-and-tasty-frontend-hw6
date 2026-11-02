@@ -10,6 +10,15 @@ describe('GroupOrdersMockStore', () => {
     expect(snapshot.total).toBe(74.5);
   });
 
+  it('returns the Owner pre-order from the demo participant data', () => {
+    const order = store.ownerPreOrder();
+    expect(order.reservationId).toBe(DEMO_RESERVATION_ID);
+    expect(order.orderItems.map(({ dish, quantity }) => [dish.id, quantity])).toEqual([
+      ['dish-spring-salad', 1],
+      ['dish-avocado-bowl', 1],
+    ]);
+  });
+
   it('submits only submitted sessions, merged by dishId', () => {
     expect(store.submit(DEMO_RESERVATION_ID)).toEqual([
       { dishId: 'dish-spring-salad', quantity: 3 },

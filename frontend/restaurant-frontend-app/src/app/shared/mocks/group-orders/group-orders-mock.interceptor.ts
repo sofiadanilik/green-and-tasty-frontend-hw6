@@ -50,6 +50,9 @@ export const groupOrdersMockInterceptor: HttpInterceptorFn = (req, next) => {
   if (req.method === 'GET' && path.endsWith(`/reservations/${DEMO_RESERVATION_ID}/guest-session-id`)) {
     return respond(() => ({ guestSessionId: DEMO_OWNER_SESSION_ID }));
   }
+  if (req.method === 'GET' && path.endsWith(`/orders/${DEMO_RESERVATION_ID}`)) {
+    return respond(() => store.ownerPreOrder());
+  }
   if (req.method === 'GET' && path.endsWith(groupBase)) {
     return respond(() => store.snapshot());
   }

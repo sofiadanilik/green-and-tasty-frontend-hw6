@@ -7,14 +7,21 @@
   background: #ffffff;
   border: 1px solid #e5e9e3;
   border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 16px;
+  padding: 20px 16px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .title {
   font-size: 20px;
   font-weight: 600;
-  margin: 0 0 12px;
+  margin: 0;
   color: #202720;
 }
 
@@ -23,7 +30,7 @@
   padding: 5px 10px;
   border-radius: 20px;
   font-size: 12px;
-  margin-bottom: 14px;
+  white-space: nowrap;
 }
 
 .submitted {
@@ -44,9 +51,9 @@
 
 .item {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) auto auto;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   padding: 12px 0;
   border-bottom: 1px solid #f0f0ec;
 }
@@ -55,11 +62,21 @@
   margin: 0;
 }
 
+.dish-image {
+  position: relative;
+  display: block;
+  width: 40px;
+  height: 40px;
+}
+
 .avatar {
+  position: absolute;
+  inset: 0;
+  display: block;
   width: 40px;
   height: 40px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 50%;
 }
 
 .initial {
@@ -70,8 +87,17 @@
   color: #137a42;
 }
 
+.dish-details {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
 .name {
   font-weight: 500;
+  overflow-wrap: anywhere;
 }
 
 .qty {
@@ -104,6 +130,11 @@
 
   .item {
     grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .dish-details {
+    display: block;
   }
 
   .price {

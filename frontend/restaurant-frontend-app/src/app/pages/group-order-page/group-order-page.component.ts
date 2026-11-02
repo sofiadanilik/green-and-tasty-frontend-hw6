@@ -15,15 +15,19 @@ import { ActivatedRoute } from '@angular/router';
 import { forkJoin, interval, switchMap } from 'rxjs';
 
 import { Participant } from '@app/models/group-orders/participant.model';
+import { Order } from '@app/models/orders/order.model';
 import { GroupReservationDetails } from '@app/models/reservations/guest-invite.model';
 import { GroupOrdersService } from '@app/services/group-orders/group-orders.service';
+import { ToastService } from '@app/services/toast/toast.service';
 import { ParticipantCardComponent } from '@app/components/group-orders/participant-card/participant-card.component';
+import { ModalComponent } from '@app/shared/custom-components/modal/modal.component';
 
 @Component({
   selector: 'app-group-order-page',
   imports: [
     CurrencyPipe,
     DatePipe,
+    ModalComponent,
     ParticipantCardComponent,
   ],
   templateUrl: './group-order-page.component.html',
@@ -34,6 +38,7 @@ export class GroupOrderPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly service = inject(GroupOrdersService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toast = inject(ToastService);
 
   private readonly syncIntervalMs = 15_000;
 
@@ -66,7 +71,7 @@ export class GroupOrderPageComponent implements OnInit {
     >();
 
     for (const person of this.participants()) {
-      if (!person.isSubmitted) {
+      if (person.type !== 'Owner' && !person.isSubmitted) {
         continue;
       }
 
@@ -97,7 +102,7 @@ export class GroupOrderPageComponent implements OnInit {
 
   readonly pendingCount = computed(() =>
     this.participants().filter(
-      (person) => !person.isSubmitted
+      (person) => person.type === 'Guest' && !person.isSubmitted
     ).length
   );
 
@@ -110,6 +115,13 @@ export class GroupOrderPageComponent implements OnInit {
   readonly canSubmit = computed(() =>
     this.status() === 'Open' &&
     this.consolidated().items.length > 0 &&
+    this.participants().some(
+      (person) =>
+        person.type === 'Guest' &&
+        person.isSubmitted &&
+        person.items.length > 0
+    ) &&
+    !this.refreshing() &&
     !this.submitting()
   );
 
@@ -153,6 +165,9 @@ export class GroupOrderPageComponent implements OnInit {
             sessions: this.service.getSessions$(
               invite.GroupReservationId
             ),
+            ownerOrder: this.service.getOwnerPreOrder$(
+              this.reservationId
+            ),
             ownerId: this.service.getOwnerSessionId$(
               this.reservationId
             ),
@@ -164,8 +179,14 @@ export class GroupOrderPageComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-        next: ({ sessions, ownerId, groupStatus }) => {
-          this.participants.set(sessions.participants);
+        next: ({ sessions, ownerOrder, ownerId, groupStatus }) => {
+          this.participants.set(
+            this.withOwnerPreOrder(
+              sessions.participants,
+              ownerId,
+              ownerOrder
+            )
+          );
           this.ownerSessionId.set(ownerId);
           this.status.set(groupStatus.status);
 
@@ -209,6 +230,10 @@ export class GroupOrderPageComponent implements OnInit {
         groupId,
         { silent: true }
       ),
+      ownerOrder: this.service.getOwnerPreOrder$(
+        this.reservationId,
+        { silent: true }
+      ),
       groupStatus: this.service.getStatus$(
         groupId,
         { silent: true }
@@ -216,11 +241,19 @@ export class GroupOrderPageComponent implements OnInit {
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ sessions, groupStatus }) => {
-          // Замінюємо дані лише після успішного
-          // отримання обох відповідей.
-          this.participants.set(sessions.participants);
+        next: ({ sessions, ownerOrder, groupStatus }) => {
+          // Keep the previous view unless every refresh request succeeds.
+          this.participants.set(
+            this.withOwnerPreOrder(
+              sessions.participants,
+              this.ownerSessionId(),
+              ownerOrder
+            )
+          );
           this.status.set(groupStatus.status);
+          if (groupStatus.status !== 'Open') {
+            this.confirmOpen.set(false);
+          }
 
           this.updatedAt.set(new Date());
           this.refreshError.set(false);
@@ -273,6 +306,7 @@ export class GroupOrderPageComponent implements OnInit {
           this.status.set('Submitted');
           this.confirmOpen.set(false);
           this.submitting.set(false);
+          this.toast.success('Pre-order sent to the restaurant');
 
           // Після зміни статусу на Submitted
           // фонові запити більше не виконуватимуться.
@@ -282,5 +316,45 @@ export class GroupOrderPageComponent implements OnInit {
           this.submitting.set(false);
         },
       });
+  }
+
+  private withOwnerPreOrder(
+    participants: Participant[],
+    ownerSessionId: string,
+    order: Order
+  ): Participant[] {
+    const existingOwner = participants.find(
+      (participant) => participant.id === ownerSessionId
+    );
+    const orderItems = order.orderItems.map((item) => ({
+      dish: {
+        id: item.dish.id,
+        name: item.dish.name,
+        price: item.dish.price,
+        imageUrl: item.dish.imageUrl ?? undefined,
+        weight: item.dish.weight,
+      },
+      quantity: item.quantity,
+    }));
+    const items = orderItems.length > 0
+      ? orderItems
+      : existingOwner?.items ?? [];
+    const owner: Participant = {
+      id: ownerSessionId,
+      type: 'Owner',
+      name: existingOwner?.name ?? 'Owner',
+      items,
+      total: items.reduce(
+        (total, item) => total + item.dish.price * item.quantity,
+        0
+      ),
+      isSubmitted: existingOwner?.isSubmitted ?? false,
+    };
+
+    return existingOwner
+      ? participants.map((participant) =>
+          participant.id === ownerSessionId ? owner : participant
+        )
+      : [owner, ...participants];
   }
 }
