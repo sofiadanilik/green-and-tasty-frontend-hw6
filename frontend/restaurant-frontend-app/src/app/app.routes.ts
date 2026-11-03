@@ -7,6 +7,7 @@ import { MainPageComponent } from './pages/main-page/main-page.component';
 import { ReservationConfirmedComponent } from './components/reservations/reservation-confirmed/reservation-confirmed.component';
 import { TablesComponent } from './components/tables/tables/tables.component';
 import { AuthGuard } from './auth/guards/auth.guard';
+import { groupOwnerGuard } from './auth/guards/group-owner.guard';
 import { ReservationDashboardComponent } from './pages/reservation-dashboard/reservation-dashboard.component';
 import { MenuPageComponent } from './pages/menu-page/menu-page.component';
 import { WaiterDashboardComponent } from './pages/waiter-dashboard/waiter-dashboard.component';
@@ -98,7 +99,7 @@ export const routes: Routes = [
       
 {
   path: 'reservations/:reservationId/group-order',
-  canActivate: [AuthGuard],
+  canActivate: [groupOwnerGuard],
   data: { authorized: true },
   loadComponent: () =>
     import('./pages/group-order-page/group-order-page.component')

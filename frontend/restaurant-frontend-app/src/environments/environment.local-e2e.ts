@@ -1,3 +1,4 @@
 export const environment = {
-  backendUrl: 'http://127.0.0.1:5278',
+  backendUrl: 'https://kdepzccp2i.execute-api.us-west-2.amazonaws.com/develop',
+  localE2E: true,
 };

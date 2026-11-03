@@ -126,7 +126,7 @@ export class GuestPreOrderPageComponent {
         return {
             id: dish.id,
             name: dish.name,
-            imageUrl: getDishImageUrl(dish.name, dish.imageUrl) ?? '',
+            imageUrl: getDishImageUrl(dish.name, dish.imageUrl, dish.id) ?? '',
             price: dish.price,
             state: dish.selectable ? dish.state : 'OutOfStock',
             weight: dish.weight ?? '',

@@ -310,3 +310,53 @@
   opacity: 0.6;
   cursor: wait;
 }
+
+/* Isolated local test invite; real reservations keep the existing reservation modal. */
+.local-invite-share {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid color.$green-150;
+  border-radius: 12px;
+  background: color.$neutral-0;
+}
+.local-invite-share label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.local-invite-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.local-invite-actions input {
+  flex: 1 1 230px;
+  min-width: 0;
+  border: 1px solid color.$green-150;
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: color.$neutral-100;
+  color: inherit;
+}
+.local-invite-actions button {
+  border: 0;
+  border-radius: 8px;
+  background: color.$green-600;
+  color: white;
+  padding: 9px 16px;
+  cursor: pointer;
+}
+.local-invite-share small {
+  display: block;
+  margin-top: 8px;
+  color: color.$neutral-600;
+}
+
+// Display only for the isolated local Owner test, never for real customers.
+.local-debug-error {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  color: #874a15;
+  max-width: 100%;
+}

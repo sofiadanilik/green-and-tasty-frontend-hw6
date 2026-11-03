@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { GroupInviteToken, GuestInvite } from '@app/models/reservations/guest-invite.model';
 import { API_BASE_URL } from '@app/shared/config/api-base-url.token';
+import { apiUrlForInvite, apiUrlForReservation } from '@app/shared/config/local-e2e-routing';
 
 @Injectable({
   providedIn: 'root',
@@ -13,11 +14,13 @@ export class GuestInviteService {
 
   getInviteToken$(reservationId: string): Observable<GroupInviteToken> {
     return this.http.get<GroupInviteToken>(
-      `${this.baseUrl}/reservations/${encodeURIComponent(reservationId)}/invite-token`,
+      `${apiUrlForReservation(this.baseUrl, reservationId)}/reservations/${encodeURIComponent(reservationId)}/invite-token`,
     );
   }
 
   getInvite$(token: string): Observable<GuestInvite> {
-    return this.http.get<GuestInvite>(`${this.baseUrl}/guest/invites/${encodeURIComponent(token)}`);
+    return this.http.get<GuestInvite>(
+      `${apiUrlForInvite(this.baseUrl, token)}/guest/invites/${encodeURIComponent(token)}`
+    );
   }
 }

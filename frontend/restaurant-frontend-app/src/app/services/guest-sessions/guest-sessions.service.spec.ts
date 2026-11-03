@@ -44,6 +44,15 @@ describe('GuestSessionsService', () => {
     request.flush({ SessionId: 'session-1', SessionToken: 'guest-token' });
   });
 
+  it('accepts camelCase guest session IDs from local ASP.NET JSON', () => {
+    let id = '';
+    service.createSession({ groupReservationId: 'group-1', guestName: 'Marta' })
+      .subscribe((response) => id = response.SessionId);
+    http.expectOne(`${BASE_URL}/guest/sessions`)
+      .flush({ sessionId: 'local-guest-1', sessionToken: 'local-token' });
+    expect(id).toBe('local-guest-1');
+  });
+
   it('writes selected dish quantities with the guest session token', () => {
     service.addDish('session-1', 'guest-token', 'dish-1', 2).subscribe();
 

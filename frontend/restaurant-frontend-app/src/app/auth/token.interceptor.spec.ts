@@ -5,6 +5,8 @@ import { ToastService } from '../services/toast/toast.service';
 import { AuthenticationService } from './services/authentication.service';
 import { SKIP_ERROR_TOAST } from './skip-error-toast.context';
 import { tokenInterceptor } from './token.interceptor';
+import { environment } from '../../environments/environment';
+import { LOCAL_E2E_OWNER_TOKEN } from '../shared/config/local-e2e-routing';
 
 const URL = 'https://test.api/reservations';
 
@@ -36,6 +38,47 @@ describe('tokenInterceptor', () => {
 
   afterEach(() => {
     httpMock.verify();
+  });
+
+
+  it('adds the fixture Owner token to ONLY the isolated local reservation', () => {
+    const wasEnabled = environment.localE2E;
+    environment.localE2E = true;
+    try {
+      const localUrl = 'http://127.0.0.1:5278/reservations/local-reservation/group-order';
+      http.get(localUrl).subscribe();
+      const localRequest = httpMock.expectOne(localUrl);
+      expect(localRequest.request.headers.get('Authorization'))
+        .toBe(`Bearer ${LOCAL_E2E_OWNER_TOKEN}`);
+      localRequest.flush({ GroupReservationId: 'local-group' });
+
+      http.get('https://test.api/reservations/real-reservation/group-order').subscribe();
+      const awsRequest = httpMock.expectOne('https://test.api/reservations/real-reservation/group-order');
+      expect(awsRequest.request.headers.has('Authorization')).toBeFalse();
+      awsRequest.flush({ GroupReservationId: 'real-group' });
+    } finally {
+      environment.localE2E = wasEnabled;
+    }
+  });
+
+  it('does not leak the local token to other localhost services or guest-session endpoints', () => {
+    const wasEnabled = environment.localE2E;
+    environment.localE2E = true;
+    try {
+      const urls = [
+        'http://127.0.0.1:5279/reservations/local-reservation/group-order',
+        'http://127.0.0.1:5278/reservations/some-real-reservation/group-order',
+        'http://127.0.0.1:5278/guest/sessions/test-id/menu',
+      ];
+      for (const url of urls) {
+        http.get(url).subscribe();
+        const req = httpMock.expectOne(url);
+        expect(req.request.headers.has('Authorization')).toBeFalse();
+        req.flush({});
+      }
+    } finally {
+      environment.localE2E = wasEnabled;
+    }
   });
 
   it('shows the server message in a toast for a 400 response', () => {

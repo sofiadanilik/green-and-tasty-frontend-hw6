@@ -234,6 +234,22 @@ describe('Рівень 2 · сторінка Owner Review', () => {
       expect(buttonByText(element, 'Submit Pre-Order')?.disabled).toBeTrue();
     });
 
+    it('keeps the full guest-inclusive grand total and Restaurant Order after Submit', () => {
+      service.submit$.and.returnValue(of([
+        { dishId: 'dish1', quantity: 3 },
+      ]));
+      const { fixture, element } = create();
+      const before = element.textContent ?? '';
+      expect(before).toContain('$540.00');
+      buttonByText(element, 'Submit Pre-Order')?.click();
+      fixture.detectChanges();
+      buttonByText(element.querySelector('[role="dialog"]')!, 'Submit')?.click();
+      fixture.detectChanges();
+      expect(element.textContent).toContain('Sent to Restaurant');
+      expect(element.textContent).toContain('Restaurant Order');
+      expect(element.textContent).toContain('$540.00');
+    });
+
     it('помилка submit: екран не ламається, кнопку можна натиснути знову', () => {
       service.submit$.and.returnValue(throwError(() => new HttpErrorResponse({ status: 400 })));
       const { fixture, element } = create();

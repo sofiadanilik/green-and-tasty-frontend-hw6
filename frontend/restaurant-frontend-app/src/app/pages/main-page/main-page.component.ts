@@ -94,6 +94,13 @@ export class MainPageComponent implements OnInit {
     });
   }
 
+  onPopularDishImageError(dish: DishListResponse): void {
+    // Signed API photos may expire. Prefer an exact local name match, or show
+    // the accessible placeholder; do not substitute the same wrong photo.
+    const replacement = getDishImageUrl(dish.name, null, dish.id);
+    dish.imageUrl = replacement && replacement !== dish.imageUrl ? replacement : '';
+  }
+
   loadLocations(): void {
     this.locationsService.getLocations().subscribe((data) => {
       this.locations = data.slice(0, 3).map((location) => ({

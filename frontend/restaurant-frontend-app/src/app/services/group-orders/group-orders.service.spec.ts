@@ -44,6 +44,14 @@ describe('Рівень 2 · GroupOrdersService', () => {
     expect(orderId).toBe('order-1');
   });
 
+  it('treats a missing personal Owner cart (404) as empty, not as a missing group', () => {
+    let itemCount = -1;
+    service.getOwnerPreOrder$('res-1').subscribe((order) => itemCount = order.orderItems.length);
+    http.expectOne(`${BASE_URL}/orders/res-1`)
+      .flush({ error: 'no personal cart' }, { status: 404, statusText: 'Not Found' });
+    expect(itemCount).toBe(0);
+  });
+
   it('getSessions$: GET /guest/groups/{id}/sessions', () => {
     let response: unknown;
     service.getSessions$('grp-1').subscribe((value) => (response = value));

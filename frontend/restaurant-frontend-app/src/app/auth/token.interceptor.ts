@@ -10,6 +10,7 @@ import { inject } from '@angular/core';
 import { AuthenticationService } from './services/authentication.service';
 import { SKIP_ERROR_TOAST } from './skip-error-toast.context';
 import { getServerErrorMessage } from '../shared/helpers/http-error-helpers';
+import { isLocalE2EOwnerRequest, LOCAL_E2E_OWNER_TOKEN } from '../shared/config/local-e2e-routing';
 
 export const tokenInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
@@ -70,16 +71,16 @@ export const tokenInterceptor: HttpInterceptorFn = (
     );
   }
 
+  // The test Owner has no Cognito login. Authenticate ONLY requests to the
+  // isolated local API; real reservations must continue using Cognito/AWS.
+  const localOwnerRequest = isLocalE2EOwnerRequest(req.url);
   const authService = inject(AuthenticationService);
-  const tokens = authService.getTokens();
+  const tokens = localOwnerRequest ? null : authService.getTokens();
 
-  const clonedRequest =
-    tokens && tokens.idToken
-      ? req.clone({
-        setHeaders: {
-          Authorization: 'Bearer ' + tokens.idToken,
-        },
-      })
+  const clonedRequest = localOwnerRequest
+    ? req.clone({ setHeaders: { Authorization: `Bearer ${LOCAL_E2E_OWNER_TOKEN}` } })
+    : tokens?.idToken
+      ? req.clone({ setHeaders: { Authorization: `Bearer ${tokens.idToken}` } })
       : req;
 
   return next(clonedRequest).pipe(

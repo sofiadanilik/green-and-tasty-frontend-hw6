@@ -1,14 +1,19 @@
 
-import { HttpClient, HttpContext } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, of, throwError } from 'rxjs';
 
 import { Participant } from '@app/models/group-orders/participant.model';
 import { Order } from '@app/models/orders/order.model';
 import { GroupReservationDetails } from '@app/models/reservations/guest-invite.model';
 import { API_BASE_URL } from '@app/shared/config/api-base-url.token';
+import { apiUrlForGroup, apiUrlForReservation } from '@app/shared/config/local-e2e-routing';
 
 import { SKIP_ERROR_TOAST } from '@app/auth/skip-error-toast.context';
+import {
+  normalizeOwnerGroup, normalizeOwnerOrder, normalizeSessions,
+  normalizeOwnerSessionId, normalizeGroupStatus, normalizeSubmission,
+} from './owner-api-normalizers';
 
 export interface GroupInvite {
   GroupReservationId: string;
@@ -43,23 +48,35 @@ export class GroupOrdersService {
 
   // Load group details through the authenticated Owner endpoint.
   getOwnerGroup$(reservationId: string): Observable<GroupReservationDetails> {
-    return this.http.get<GroupReservationDetails>(
-      `${this.baseUrl}/reservations/${reservationId}/group-order`
-    );
+    return this.http.get<unknown>(
+      `${apiUrlForReservation(this.baseUrl, reservationId)}/reservations/${reservationId}/group-order`
+    ).pipe(map(normalizeOwnerGroup));
   }
 
   getOwnerPreOrder$(
     reservationId: string,
     options?: { silent?: boolean }
   ): Observable<Order> {
-    return this.http.get<Order>(
-      `${this.baseUrl}/orders/${reservationId}`,
+    return this.http.get<unknown>(
+      `${apiUrlForReservation(this.baseUrl, reservationId)}/orders/${reservationId}`,
       {
         context: new HttpContext().set(
           SKIP_ERROR_TOAST,
           options?.silent === true
         ),
       }
+    ).pipe(
+      map(normalizeOwnerOrder),
+      catchError((error: unknown) => {
+        // An Owner may not have started a personal cart yet. This is not a missing group.
+        if (error instanceof HttpErrorResponse && error.status === 404) {
+          return of<Order>({
+            orderId: '', reservationAddress: '', reservationTime: '',
+            reservationId, orderItems: [], status: 0,
+          });
+        }
+        return throwError(() => error);
+      })
     );
   }
 
@@ -69,24 +86,24 @@ export class GroupOrdersService {
   groupReservationId: string,
   options?: { silent?: boolean }
 ): Observable<GroupSessions> {
-   return this.http.get<GroupSessions>(
-  `${this.baseUrl}/guest/groups/${groupReservationId}/sessions`,
+   return this.http.get<unknown>(
+  `${apiUrlForGroup(this.baseUrl, groupReservationId)}/guest/groups/${groupReservationId}/sessions`,
   {
     context: new HttpContext().set(
       SKIP_ERROR_TOAST,
       options?.silent === true
     ),
   }
-);
+).pipe(map(normalizeSessions));
 }
 
   // 3. Отримати ID власної сесії Owner
   getOwnerSessionId$(reservationId: string): Observable<string> {
     return this.http
-      .get<{ guestSessionId: string }>(
-        `${this.baseUrl}/reservations/${reservationId}/guest-session-id`
+      .get<unknown>(
+        `${apiUrlForReservation(this.baseUrl, reservationId)}/reservations/${reservationId}/guest-session-id`
       )
-      .pipe(map((response) => response.guestSessionId));
+      .pipe(map(normalizeOwnerSessionId));
   }
 
   // 4. Отримати статус групового замовлення
@@ -94,15 +111,15 @@ export class GroupOrdersService {
   groupReservationId: string,
   options?: { silent?: boolean }
 ): Observable<GroupStatus> {
-    return this.http.get<GroupStatus>(
-  `${this.baseUrl}/guest/groups/${groupReservationId}/status`,
+    return this.http.get<unknown>(
+  `${apiUrlForGroup(this.baseUrl, groupReservationId)}/guest/groups/${groupReservationId}/status`,
   {
     context: new HttpContext().set(
       SKIP_ERROR_TOAST,
       options?.silent === true
     ),
   }
-);
+).pipe(map(normalizeGroupStatus));
 }
 
   // 5. Підтвердити спільне замовлення
@@ -110,9 +127,9 @@ export class GroupOrdersService {
     groupReservationId: string,
     reservationId: string
   ): Observable<ConsolidatedDish[]> {
-    return this.http.post<ConsolidatedDish[]>(
-      `${this.baseUrl}/group-reservations/${groupReservationId}/submit`,
+    return this.http.post<unknown>(
+      `${apiUrlForGroup(this.baseUrl, groupReservationId)}/group-reservations/${groupReservationId}/submit`,
       { reservationId }
-    );
+    ).pipe(map(normalizeSubmission));
   }
 }

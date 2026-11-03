@@ -14,6 +14,9 @@
       <div class="page-state" role="alert">
         <h1>Could not load group pre-order</h1>
         <p>Please check your connection and try again.</p>
+        @if (localDebugError()) {
+          <p class="local-debug-error">{{ localDebugError() }}</p>
+        }
         <button type="button" class="retry-button" (click)="load()">Try again</button>
       </div>
     } @else {
@@ -58,6 +61,17 @@
           <p class="refresh-error" role="status">
             Couldn't refresh. Showing data from {{ updatedAt() | date: 'HH:mm:ss' }}.
           </p>
+        }
+
+        @if (localInviteUrl) {
+          <div class="local-invite-share">
+            <label for="local-guest-invite">Invite a guest (local test)</label>
+            <div class="local-invite-actions">
+              <input id="local-guest-invite" type="text" readonly [value]="localInviteUrl" />
+              <button type="button" (click)="copyLocalInvite()">Copy invite link</button>
+            </div>
+            <small>Use another private browser window on this computer for Guest 2.</small>
+          </div>
         }
 
         @if (groupDetails(); as details) {

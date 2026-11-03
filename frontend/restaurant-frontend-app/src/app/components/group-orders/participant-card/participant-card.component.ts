@@ -32,7 +32,7 @@ export class ParticipantCardComponent {
   });
 
   imageUrl(dish: DishShort): string | null {
-    return getDishImageUrl(dish.name, dish.imageUrl);
+    return getDishImageUrl(dish.name, dish.imageUrl, dish.id);
   }
 
   hideBrokenImage(event: Event): void {
