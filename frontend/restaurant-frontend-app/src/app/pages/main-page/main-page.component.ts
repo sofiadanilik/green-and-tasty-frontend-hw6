@@ -84,7 +84,7 @@ export class MainPageComponent implements OnInit {
 
   loadPopularDishes(): void {
     this.dishesService.getPopularDishes().subscribe((data) => {
-      this.dishes = data.slice(0, 4).map((dish) => ({
+      this.dishes = data.slice(0, 8).map((dish) => ({
         ...dish,
         imageUrl: getDishImageUrl(dish.name, dish.imageUrl) ?? '',
         name: dish.name || 'Unknown Dish',
@@ -105,7 +105,13 @@ export class MainPageComponent implements OnInit {
     this.locationsService.getLocations().subscribe((data) => {
       this.locations = data.slice(0, 3).map((location) => ({
         ...location,
-        imageUrl: location.imageUrl || 'assets/img/locations/baratashvili-street-14.jpg',
+       imageUrl: /abashidze/i.test(location.address ?? '')
+  ? 'assets/img/locations/abashidze-street-9.jpg'
+  : /baratashvili/i.test(location.address ?? '')
+    ? 'assets/img/locations/baratashvili-street-14.jpg'
+    : /rustaveli/i.test(location.address ?? '')
+      ? 'assets/img/locations/rustaveli-avenue-48.jpg'
+      : (location.imageUrl || 'assets/img/locations/baratashvili-street-14.jpg'),
         address: location.address || 'Unknown Address',
         totalCapacity: location.totalCapacity || 0,
         averageOccupancy: location.averageOccupancy || 'N/A',

@@ -1,0 +1,16 @@
+{
+  "name": "greentasty-hw8-automation",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test -g @smoke",
+    "test:l1": "playwright test -g @l1",
+    "test:l2": "playwright test -g @l2",
+    "test:l3": "playwright test -g @l3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
+  }
+}

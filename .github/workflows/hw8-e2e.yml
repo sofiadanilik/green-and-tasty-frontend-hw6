@@ -1,0 +1,62 @@
+name: HW8 E2E (Group Pre-Order L1-L3)
+
+on:
+  push:
+    paths:
+      - 'hw8/**'
+      - '.github/workflows/hw8-e2e.yml'
+  pull_request:
+    paths:
+      - 'hw8/**'
+  workflow_dispatch:
+
+jobs:
+  playwright-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright test dependencies
+        working-directory: hw8
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium
+        working-directory: hw8
+        run: npx playwright install --with-deps chromium
+      - name: Run all three levels (report even if some tests fail)
+        id: tests
+        continue-on-error: true
+        working-directory: hw8
+        env:
+          CI: 'true'
+          AQA_UI_URL: ${{ vars.AQA_UI_URL }}
+          AQA_API_URL: ${{ vars.AQA_API_URL }}
+          AQA_OWNER_EMAIL: ${{ secrets.AQA_OWNER_EMAIL }}
+          AQA_OWNER_PASSWORD: ${{ secrets.AQA_OWNER_PASSWORD }}
+          AQA_OTHER_EMAIL: ${{ secrets.AQA_OTHER_EMAIL }}
+          AQA_OTHER_PASSWORD: ${{ secrets.AQA_OTHER_PASSWORD }}
+          AQA_L1_RESERVATION_ID: ${{ vars.AQA_L1_RESERVATION_ID }}
+          AQA_L1_GROUP_ID: ${{ vars.AQA_L1_GROUP_ID }}
+          AQA_L2_RESERVATION_ID: ${{ vars.AQA_L2_RESERVATION_ID }}
+          AQA_L2_GROUP_ID: ${{ vars.AQA_L2_GROUP_ID }}
+          AQA_L3_RESERVATION_ID: ${{ vars.AQA_L3_RESERVATION_ID }}
+          AQA_L3_GROUP_ID: ${{ vars.AQA_L3_GROUP_ID }}
+          AQA_L3_GUEST_SESSION_ID: ${{ vars.AQA_L3_GUEST_SESSION_ID }}
+          AQA_OTHER_GROUP_GUEST_ID: ${{ vars.AQA_OTHER_GROUP_GUEST_ID }}
+          AQA_ALLOW_MUTATION: 'false'
+        run: npm test
+      - name: Upload HTML, JUnit, screenshots, video and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hw8-playwright-results
+          path: |
+            hw8/playwright-report/
+            hw8/test-results/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Expose test outcome
+        if: always()
+        run: echo 'Test step outcome: ${{ steps.tests.outcome }}'
