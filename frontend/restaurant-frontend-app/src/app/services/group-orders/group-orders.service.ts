@@ -122,6 +122,13 @@ export class GroupOrdersService {
 ).pipe(map(normalizeGroupStatus));
 }
 
+  // HW6 bonus / HW8 Level 3: Owner removes a Guest session.
+  removeSession$(groupReservationId: string, guestSessionId: string): Observable<GroupSessions> {
+    return this.http.delete<unknown>(
+      `${apiUrlForGroup(this.baseUrl, groupReservationId)}/guest/groups/${encodeURIComponent(groupReservationId)}/sessions/${encodeURIComponent(guestSessionId)}`
+    ).pipe(map(normalizeSessions));
+  }
+
   // 5. Підтвердити спільне замовлення
   submit$(
     groupReservationId: string,

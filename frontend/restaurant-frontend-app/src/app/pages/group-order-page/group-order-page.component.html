@@ -63,7 +63,7 @@
           </p>
         }
 
-        @if (localInviteUrl) {
+        @if (localInviteUrl && status() === 'Open') {
           <div class="local-invite-share">
             <label for="local-guest-invite">Invite a guest (local test)</label>
             <div class="local-invite-actions">
@@ -125,6 +125,8 @@
               [participant]="person"
               [isOwnerOrder]="person.id === ownerSessionId()"
               [isFinalOrder]="person.id === ownerSessionId() && status() === 'Submitted'"
+              [canRemove]="person.type === 'Guest' && status() === 'Open' && !removing() && !submitting() && !refreshing()"
+              (removeClick)="openRemoveConfirmation($event)"
             />
           </li>
         }
@@ -170,6 +172,28 @@
       }
     }
   </section>
+
+  @if (removalCandidate(); as guest) {
+    <app-modal
+      [title]="'Remove Guest'"
+      [width]="'520px'"
+      [closeOnBackdrop]="false"
+      (closed)="closeRemoveConfirmation()"
+    >
+      <p class="confirmation-copy">
+        Are you sure you want to remove <strong>{{ guest.name }}</strong> and their pre-order
+        from this reservation? This action cannot be undone.
+      </p>
+      <div class="dialog-actions" modal-actions>
+        <button type="button" class="dialog-cancel" [disabled]="removing()" (click)="closeRemoveConfirmation()">
+          Cancel
+        </button>
+        <button type="button" class="dialog-remove" [disabled]="removing()" (click)="confirmRemoveGuest()">
+          {{ removing() ? 'Removing…' : 'Remove Guest' }}
+        </button>
+      </div>
+    </app-modal>
+  }
 
   @if (confirmOpen()) {
     <app-modal

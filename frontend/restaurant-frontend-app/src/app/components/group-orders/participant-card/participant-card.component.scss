@@ -142,3 +142,18 @@
     text-align: right;
   }
 }
+
+
+.remove-guest-button {
+  display: inline-block;
+  margin: 0 0 12px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #b3261e;
+  cursor: pointer;
+  text-decoration: underline;
+  font: inherit;
+  font-size: 14px;
+}
+.remove-guest-button:focus-visible { outline: 2px solid #b3261e; outline-offset: 3px; }

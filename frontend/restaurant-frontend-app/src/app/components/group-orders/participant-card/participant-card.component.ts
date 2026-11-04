@@ -5,6 +5,7 @@ import {
   Component,
   computed,
   input,
+  output,
 } from '@angular/core';
 import { DishShort, Participant } from '@app/models/group-orders/participant.model';
 import { getDishImageUrl } from '@app/shared/helpers/dish-image.helpers';
@@ -20,6 +21,8 @@ export class ParticipantCardComponent {
   readonly participant = input.required<Participant>();
   readonly isOwnerOrder = input(false);
   readonly isFinalOrder = input(false);
+  readonly canRemove = input(false);
+  readonly removeClick = output<Participant>();
 
   readonly title = computed(() => {
     const person = this.participant();

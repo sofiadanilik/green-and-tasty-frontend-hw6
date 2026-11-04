@@ -11,6 +11,17 @@
     }
   </header>
 
+  @if (canRemove() && participant().type === 'Guest') {
+    <button
+      type="button"
+      class="remove-guest-button"
+      [attr.aria-label]="'Remove ' + participant().name"
+      (click)="removeClick.emit(participant())"
+    >
+      Remove Guest
+    </button>
+  }
+
   @if (participant().items.length) {
     <ul class="items">
       @for (item of participant().items; track item.dish.id) {

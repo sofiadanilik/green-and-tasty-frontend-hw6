@@ -360,3 +360,15 @@
   color: #874a15;
   max-width: 100%;
 }
+
+
+.dialog-remove {
+  border: 0;
+  background: #b3261e;
+  border-radius: 8px;
+  padding: 10px 18px;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.dialog-remove:disabled { opacity: .5; cursor: wait; }

@@ -17,69 +17,85 @@ npm.cmd start
 The Owner page is `/reservations/:reservationId/group-order`. Reservation
 cards link directly to **Group Pre-Order**.
 
-## Local Level 3 integration run
+## Level 3 acceptance status
 
-The separate Backend workspace contains `LocalE2E`, a localhost-only .NET
-host that calls the production guest-session and group-reservation services
-and API handlers. Its repositories are isolated in-memory fixtures; it does
-not use AWS, DynamoDB, Cognito, or real accounts/reservations. Data resets
-when the host restarts.
+The Level 3 workflow in `homework-frontend.md` requires an authenticated
+Customer to register/sign in, create a reservation, share its generated invite
+link, have a guest submit a cart from a separate browser session, see it on
+Owner within 15 seconds, and submit the consolidated order.
 
-Start the backend from its checkout:
+**That complete workflow is not verified by the delivered frontend.** The
+deployed AWS path has not been exercised with an authenticated Customer. The
+unauthenticated request made during local verification returned HTTP 403,
+which by itself does not establish whether the protected group-order route is
+deployed. No AWS resources were changed.
+
+The available local `LocalE2E` host is only a fixed-fixture integration
+environment. It seeds `local-reservation` and `local-group`, exposes a static
+local Owner sign-in, and keeps data in memory. It does not implement customer
+registration/authentication or dynamically create reservations. Do not count
+this fixture as evidence of real registration or booking, and do not use its
+localhost invite URL as a public link.
+
+### Reproduce the available local fixture (partial verification only)
+
+The backend is a separate repository:
+[sofiadanilik/restaurant-backend-app](https://github.com/sofiadanilik/restaurant-backend-app).
+Clone it separately and ensure its checkout contains the `LocalE2E` project and
+the Level 3 group-reservation API changes. The current local backend checkout
+has uncommitted changes; those changes have **not** been delivered to that
+remote repository or included in this frontend repository. A clean clone alone
+may therefore not reproduce the fixture.
+
+From the backend checkout, start its localhost-only fixture:
 
 ```powershell
-Set-Location 'C:\Users\sofia\Downloads\marathon2026-archive\marathon2026\backend\restaurant-backend-app'
+Set-Location .\restaurant-backend-app
 dotnet run --project .\LocalE2E\LocalE2E.csproj
 ```
 
-In another terminal, start the frontend with its dedicated localhost API
-configuration:
+In another terminal, from this frontend checkout:
 
 ```powershell
 Set-Location .\frontend\restaurant-frontend-app
 npm.cmd run start:e2e
 ```
 
-The host health endpoint is `http://127.0.0.1:5278/__local/health`; the guest
-invitation is `http://127.0.0.1:4200/join/local-invite`; and the Owner page is
-`http://127.0.0.1:4200/reservations/local-reservation/group-order`.
+The fixed invitation is `http://127.0.0.1:4200/join/local-invite`; the Owner
+page is `http://127.0.0.1:4200/reservations/local-reservation/group-order`.
+The local API health endpoint is `http://127.0.0.1:5278/__local/health`.
+The API source and fixture run instructions are in the separate backend
+repository's `LocalE2E/README.md`.
 
-For browser verification, obtain the local-only token from
-`POST http://127.0.0.1:5278/signin` and put its response in the `auth`
-localStorage key as the app's `idToken` and `accessToken`. Never use a real
-AWS/Cognito token with this test host.
+The fixture's local `/signin` response is a test-only static Owner token, not
+Customer registration or authentication. Never use a real AWS/Cognito token
+with this host. Existing fixture checks exercised guest HTTP submission,
+Owner polling, and consolidated Submit against `127.0.0.1:5278`; they verify
+the group-order integration only after the fixed reservation already exists.
 
-The local HTTP integration run verified a guest named Nania joining from the
-invitation, submitting Spring Salad × 2, the Owner page showing Nania's
-persisted name/status/dish/quantity/$25.00 subtotal, 15-second polling
-detecting another submitted guest, manual Refresh, and Owner final submission
-with status **Sent to Restaurant**. It used production backend handlers and
-services with isolated in-memory repositories, not demo mocks. The captured
-fixture had an empty Owner cart:
-[local-e2e-sent-to-restaurant.png](./homework-design/local-e2e-sent-to-restaurant.png).
-
-After restarting the local .NET host and Angular with `start:e2e`, a fresh
-browser run verified that the Owner's group details, participant sessions,
-Owner order, and final Submit all use `http://127.0.0.1:5278` rather than AWS.
-The Owner view showed persisted guest names, dishes, quantities and subtotals,
-plus the Owner's own order. Session refreshes were observed at approximately
-15-second intervals, and final Submit displayed **Sent to Restaurant**. This
-is an isolated local fixture run, not a deployed AWS verification.
-
-**Deployment limitation:** the shared AWS API currently does not expose
-`GET /reservations/{reservationId}/group-order`. Consequently, this local
-verification does not prove the deployed AWS/DynamoDB/Cognito path. The
-additive API Gateway route and CORS change has not been deployed; existing
-shared AWS resources were not modified.
+On the current Windows machine, the standard `dotnet run` host is blocked by
+Windows Code Integrity: `LocalE2E.exe` cannot load `APIHandler.dll` under the
+active signing-level policy (Code Integrity events 3077/3033). No security
+setting was changed. Do not work around the policy by bundling or relocating
+the DLL; use an organization-approved signed build or a compliant test
+environment before repeating this fixture.
 
 ## Final verification status
 
-After Submit, a fresh local browser page was reloaded and verified against the
-backend: the final order remains **$43.00**, submitted guest dishes are not
-counted twice, and the Owner card is labeled **Restaurant Order**. Over the
-following 17 seconds, only the initial sessions request occurred; the earlier
-open-group run verified 15-second polling. The local fixture is in-memory and
-resets when the backend process restarts.
+An earlier browser run against the fixed local fixture verified final Submit,
+the **$43.00** restaurant order, and that polling stopped after submission.
+Those screenshots and checks predate the interrupted fresh run below.
+
+In the latest separate-profile browser attempt, Nania submitted Spring Salad
+× 2, another guest submitted Green Bowl × 1, and the Owner page displayed both
+guests, the Owner's Green Bowl × 1, and the **$61.00** consolidated total.
+This attempt did not establish the 15-second detection threshold, did not
+perform final Submit, and did not capture new before/after screenshots. The
+fixture is in-memory and resets when its backend process restarts. These are
+partial local checks, not full Level 3 acceptance or verification against
+AWS.
+
+## Screenshots and disclosure
 
 The regular frontend was also opened against the existing shared API to check
 the home page, menu, and table-search form. No reservation was created
@@ -91,6 +107,9 @@ Screenshots:
 
 - [Owner review](./homework-design/local-e2e-owner-review.png)
 - [Submitted restaurant order](./homework-design/local-e2e-sent-to-restaurant.png)
+
+These are retained screenshots from an earlier fixture run, not evidence from
+the latest interrupted browser attempt.
 
 AI disclosure: AI assistance (Copilot) was used to inspect and update the
 frontend and to run/interpret local validation. The checks below are the
@@ -113,11 +132,15 @@ Backend tests (from the Backend checkout):
 dotnet test .\restaurant-backend-app.sln
 ```
 
-Latest run: **86/86** Homework #6 frontend tests passed; the targeted dish-card
-test passed **2/2**. Application and spec TypeScript checks passed, and the
-production build passed with a placeholder backend URL (no AWS deployment or
-request). Backend tests passed **162/162**. Existing bundle/style-size,
-CommonJS, and NuGet dependency vulnerability warnings remain.
+Latest focused validation after scoped local routing: **86/86** Homework #6
+frontend tests passed. The Backend solution tests also passed **162/162**.
+
+Latest full `npm run test -- --watch=false`: **271 passed, 46 failed, 317
+total**. Failures include component-creation tests and numerous
+`GeneralInformationComponent` tests; they are outside the focused Homework #6
+suite. The production build passed after the routing changes and the bundle
+placeholder check passed. Existing bundle/style budget and CommonJS warnings
+remain.
 
 ## Homework references
 

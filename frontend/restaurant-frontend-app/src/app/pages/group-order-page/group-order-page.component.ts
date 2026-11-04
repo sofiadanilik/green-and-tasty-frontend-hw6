@@ -58,6 +58,8 @@ export class GroupOrderPageComponent implements OnInit {
   readonly localDebugError = signal<string | null>(null);
   readonly confirmOpen = signal(false);
   readonly submitting = signal(false);
+  readonly removalCandidate = signal<Participant | null>(null);
+  readonly removing = signal(false);
   private readonly submittedSnapshot = signal<{
     items: { dish: ParticipantItem['dish']; quantity: number }[];
     total: number;
@@ -151,7 +153,8 @@ export class GroupOrderPageComponent implements OnInit {
         person.items.length > 0
     ) &&
     !this.refreshing() &&
-    !this.submitting()
+    !this.submitting() &&
+    !this.removing()
   );
 
   // Завантаження сторінки та автоматична синхронізація.
@@ -167,7 +170,8 @@ export class GroupOrderPageComponent implements OnInit {
           this.status() !== 'Open' ||
           this.loading() ||
           this.refreshing() ||
-          this.submitting()
+          this.submitting() ||
+          this.removing()
         ) {
           return;
         }
@@ -184,6 +188,8 @@ export class GroupOrderPageComponent implements OnInit {
     this.localDebugError.set(null);
     this.refreshError.set(false);
     this.confirmOpen.set(false);
+    this.removalCandidate.set(null);
+    this.removing.set(false);
 
     this.service
       .getOwnerGroup$(this.reservationId)
@@ -253,7 +259,8 @@ export class GroupOrderPageComponent implements OnInit {
       this.status() !== 'Open' ||
       this.loading() ||
       this.refreshing() ||
-      this.submitting()
+      this.submitting() ||
+      this.removing()
     ) {
       return;
     }
@@ -300,6 +307,51 @@ export class GroupOrderPageComponent implements OnInit {
           // Показуємо помилку та залишаємо старі дані.
           this.refreshError.set(true);
           this.refreshing.set(false);
+        },
+      });
+  }
+
+  openRemoveConfirmation(person: Participant): void {
+    if (this.status() !== 'Open' || person.type !== 'Guest' ||
+        !this.groupId() || this.removing() || this.refreshing() || this.submitting()) {
+      return;
+    }
+    this.removalCandidate.set(person);
+  }
+
+  closeRemoveConfirmation(): void {
+    if (!this.removing()) this.removalCandidate.set(null);
+  }
+
+  confirmRemoveGuest(): void {
+    const guest = this.removalCandidate();
+    if (!guest || guest.type !== 'Guest' || this.status() !== 'Open' ||
+        this.removing() || this.refreshing() || this.submitting()) {
+      return;
+    }
+    this.removing.set(true);
+
+    this.service.removeSession$(this.groupId(), guest.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (snapshot) => {
+          // Keep the Owner's personal order loaded from /orders/{id}; the
+          // group sessions snapshot may contain no items for that session.
+          const owner = this.participants().find(p => p.id === this.ownerSessionId());
+          const updated = snapshot.participants.map(p =>
+            owner && p.id === owner.id ? { ...p, items: owner.items, total: owner.total } : p
+          );
+          if (owner && !updated.some(p => p.id === owner.id)) updated.unshift(owner);
+          this.participants.set(updated);
+          this.updatedAt.set(new Date());
+          this.refreshError.set(false);
+          this.removalCandidate.set(null);
+          this.removing.set(false);
+          this.toast.success('Guest removed from group');
+        },
+        error: () => {
+          this.removing.set(false);
+          // Keep the old participants and the confirmation dialog for retry.
         },
       });
   }
