@@ -29,6 +29,8 @@ interface WaiterPreOrderNavigationData {
   createdByName: string;
   createdByRole: string;
   tableName: string;
+  startTime: string;
+  endTime: string;
 }
 
 @Component({
@@ -233,7 +235,9 @@ export class CardReservationComponent {
       reservationId: reservation.id,
       createdByName: this.creatorName(),
       createdByRole: this.creatorRole(),
-      tableName: reservation.tableName || 'Unknown table',
+      tableName: this.selectedTableLabel() || reservation.tableName || 'Unknown table',
+      startTime: new Date(reservation.startTime).toISOString(),
+      endTime: new Date(reservation.endTime).toISOString(),
     };
 
     sessionStorage.setItem(

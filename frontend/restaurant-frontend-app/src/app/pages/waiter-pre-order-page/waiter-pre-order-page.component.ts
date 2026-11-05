@@ -62,13 +62,39 @@ export class WaiterPreOrderPageComponent implements OnInit {
     this.tableName = data.tableName;
     this.reservationId = data.reservationId;
 
+    const reservationWithTimes = data as WaiterPreOrderState & {
+      startTime?: string;
+      endTime?: string;
+    };
+
     firstValueFrom(this.preOrdersService.getByReservationId(data.reservationId))
       .then((order) => {
         console.log('order', order);
         console.log('ORDER FROM SERVER:', JSON.stringify(order, null, 2));
 
         this.orderItems = order.orderItems ?? [];
-        this.reservationTime = order.reservationTime || '';
+        const start = reservationWithTimes.startTime
+          ? new Date(reservationWithTimes.startTime)
+          : null;
+        const end = reservationWithTimes.endTime
+          ? new Date(reservationWithTimes.endTime)
+          : null;
+
+        if (start && end && !isNaN(start.getTime()) && !isNaN(end.getTime())) {
+          const date = start.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          });
+          const timeFormat = new Intl.DateTimeFormat('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+          });
+          this.reservationTime =
+            `${date}, ${timeFormat.format(start)} - ${timeFormat.format(end)}`;
+        } else {
+          this.reservationTime = order.reservationTime || '';
+        }
         // this.refreshOrder();
       })
       .catch((err) => {
