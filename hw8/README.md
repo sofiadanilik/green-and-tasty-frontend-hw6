@@ -43,3 +43,19 @@ Set `AQA_OWNER_EMAIL`/`AQA_OWNER_PASSWORD` and other credentials under repositor
 ## Security and data lifetime
 
 Use unique/disposable reservations and avoid storing passwords in CI output. Public smoke tests are read-only. Authenticated Submit and Remove Guest are only performed with explicit mutation opt-in. In API validation cases, `Date.now()` generates non-existing IDs.
+
+## ReportPortal reporting (HW8 bonus)
+
+Personal ReportPortal project: `sofiadanilik_personal`
+
+https://demo.reportportal.io/ui/#sofiadanilik_personal/launches/all
+
+A real JUnit XML report from the HW8 Playwright GitHub Actions
+workflow was successfully imported into ReportPortal.
+The imported L3 Remove Guest test passed (1 passed, 0 failed).
+
+GitHub Actions runs the cloud CI pipeline and uploads
+Playwright HTML, JUnit, screenshots, video and traces.
+
+ReportPortal import is currently manual; automatic CI
+publication is not configured. Demo data is periodically cleared.
