@@ -26,19 +26,19 @@ import { getDishImageUrl } from '@app/shared/helpers/dish-image.helpers';
 // These URLs require an internet connection.
 const REAL_DISH_PHOTOS: Readonly<Record<string, string>> = {
   'grilled salmon':
-    'https://images.unsplash.com/photo-1748712831461-9fbf45338e13?auto=format&fit=crop&w=640&h=640&q=80',
+    'assets/img/dishes/grilled-salmon-photo.jpg',
 
   'grilled salmon 2':
-    'https://images.unsplash.com/photo-1748712831461-9fbf45338e13?auto=format&fit=crop&w=640&h=640&q=80',
+    'assets/img/dishes/grilled-salmon-photo.jpg',
 
   'margherita pizza':
-    'https://images.unsplash.com/photo-1680405620826-83b0f0f61b28?auto=format&fit=crop&w=640&h=640&q=80',
+    'assets/img/dishes/margherita-pizza-photo.jpg',
 
   'truffle mushroom risotto':
-    'https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?auto=format&fit=crop&w=640&h=640&q=80',
+    'assets/img/dishes/mushroom-risotto-photo.jpg',
 
   'fresh avocado toast':
-    'https://images.unsplash.com/photo-1603046891743-0f28d1192132?auto=format&fit=crop&w=640&h=640&q=80',
+    'assets/img/dishes/avocado-toast-photo.jpg',
 
   'green salad':
     'assets/img/dishes/spring-salad.jpg',
