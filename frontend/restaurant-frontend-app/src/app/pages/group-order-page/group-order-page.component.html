@@ -83,14 +83,14 @@
 
             <li>
               <img src="assets/svg/calendar-green.svg" alt="" aria-hidden="true" />
-              {{ details.StartTime | date: 'MMM d, y' : 'UTC' }}
+              {{ details.StartTime | date: 'MMM d, y' }}
             </li>
 
             <li>
               <img src="assets/svg/clock-green.svg" alt="" aria-hidden="true" />
-              {{ details.StartTime | date: 'HH:mm' : 'UTC' }}
+              {{ details.StartTime | date: 'HH:mm' }}
               -
-              {{ details.EndTime | date: 'HH:mm' : 'UTC' }}
+              {{ details.EndTime | date: 'HH:mm' }}
             </li>
 
             <li>
