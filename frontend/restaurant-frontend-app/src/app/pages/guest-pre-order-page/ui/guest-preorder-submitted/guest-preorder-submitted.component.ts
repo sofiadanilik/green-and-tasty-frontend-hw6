@@ -13,6 +13,30 @@ import { GuestCartItem } from '../../state/guest-preorder.store';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GuestPreorderSubmittedComponent {
+    private readonly reservationDateFormatter =
+        new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Europe/Kyiv',
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric',
+        });
+
+    private readonly reservationTimeFormatter =
+        new Intl.DateTimeFormat('en-GB', {
+            timeZone: 'Europe/Kyiv',
+            hour: '2-digit',
+            minute: '2-digit',
+            hourCycle: 'h23',
+        });
+
+    formatReservationDate(value: string | Date): string {
+        return this.reservationDateFormatter.format(new Date(value));
+    }
+
+    formatReservationTime(value: string | Date): string {
+        return this.reservationTimeFormatter.format(new Date(value));
+    }
+
     readonly invite = input<GuestInvite | null>(null);
     readonly guestName = input('');
     readonly items = input<GuestCartItem[]>([]);

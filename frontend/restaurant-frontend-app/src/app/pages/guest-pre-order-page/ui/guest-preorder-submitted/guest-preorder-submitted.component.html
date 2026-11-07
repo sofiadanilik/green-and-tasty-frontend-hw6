@@ -19,14 +19,14 @@
                     }}</span></div>
             <div class="row"><span class="label">Location</span><span class="value">{{ invite()?.LocationAddress || '-'
                     }}</span></div>
-            <div class="row"><span class="label">Date</span><span class="value">{{ invite()?.StartTime ? (invite()!.StartTime | date: 'MMM dd, yyyy') : '-' }}</span>
+            <div class="row"><span class="label">Date</span><span class="value">{{ invite()?.StartTime ? formatReservationDate(invite()!.StartTime) : '-' }}</span>
             </div>
 
             <div class="row">
                 <span class="label">Time</span>
                 <span class="value">
                     @if (invite()?.StartTime && invite()?.EndTime) {
-                    {{ invite()!.StartTime | date: 'HH:mm' }} - {{ invite()!.EndTime | date: 'HH:mm' }}
+                    {{ formatReservationTime(invite()!.StartTime) }} - {{ formatReservationTime(invite()!.EndTime) }}
                     } @else { - }
                 </span>
             </div>

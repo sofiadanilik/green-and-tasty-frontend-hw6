@@ -182,7 +182,7 @@ export class GuestPreorderStore {
             : '—';
 
         const timeText = (startText && endText)
-            ? `${new Date(startText).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })} - ${new Date(endText).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}`
+            ? `${new Date(startText).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Kyiv' })} - ${new Date(endText).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Kyiv' })}`
             : '—';
 
         const guestsText = inv.MaxGuestCount != null ? `${inv.MaxGuestCount} people` : '—';
