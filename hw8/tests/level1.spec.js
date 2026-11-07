@@ -49,6 +49,12 @@ test('@l1 @ui Owner group view respects order status and polls when collecting',
     return;
   }
 
+  if (await page.getByText('Closed', { exact: true }).isVisible()) {
+    await expect(page.getByText('Grand Total')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Submit Pre-Order' })).toBeDisabled();
+    return;
+  }
+
   await expect(page.getByText('Collecting pre-orders')).toBeVisible();
   await expect.poll(() => refreshes, { timeout: 20_000 }).toBeGreaterThanOrEqual(2);
 });
