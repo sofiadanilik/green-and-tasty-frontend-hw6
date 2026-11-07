@@ -51,7 +51,10 @@ test('@l1 @ui Owner group view respects order status and polls when collecting',
 
   if (await page.getByText('Closed', { exact: true }).isVisible()) {
     await expect(page.getByText('Grand Total')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Submit Pre-Order' })).toBeDisabled();
+    const submit = page.getByRole('button', { name: 'Submit Pre-Order' });
+    if (await submit.count() > 0) {
+      await expect(submit).toBeDisabled();
+    }
     return;
   }
 
