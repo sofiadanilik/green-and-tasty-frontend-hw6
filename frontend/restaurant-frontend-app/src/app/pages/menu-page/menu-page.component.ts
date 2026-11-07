@@ -1,3 +1,4 @@
+import { selectEighteenRealDishes } from '@app/shared/helpers/restaurant-menu.helpers';
 
 import {
   Component,
@@ -21,27 +22,28 @@ import { DishModalComponent } from '@app/components/dish-modal/dish-modal.compon
 import { PreOrdersService } from '@app/services/pre-orders/pre-orders.service';
 import { ToastService } from '@app/services/toast/toast.service';
 import { getDishImageUrl } from '@app/shared/helpers/dish-image.helpers';
+import { SHOWCASE_MENU_DISHES } from '@app/shared/mock/showcase-menu.data';
 
 // Real food photographs instead of SVG illustrations.
 // These URLs require an internet connection.
 const REAL_DISH_PHOTOS: Readonly<Record<string, string>> = {
   'grilled salmon':
-    'assets/img/dishes/grilled-salmon-photo.jpg',
+    'assets/img/dishes/plate-grilled-salmon.jpg',
 
   'grilled salmon 2':
-    'assets/img/dishes/grilled-salmon-photo.jpg',
+    'assets/img/dishes/plate-grilled-salmon.jpg',
 
   'margherita pizza':
-    'assets/img/dishes/margherita-pizza-photo.jpg',
+    'assets/img/dishes/plate-margherita-pizza.jpg',
 
   'truffle mushroom risotto':
-    'assets/img/dishes/mushroom-risotto-photo.jpg',
+    'assets/img/dishes/plate-mushroom-risotto.jpg',
 
   'fresh avocado toast':
-    'assets/img/dishes/avocado-toast-photo.jpg',
+    'assets/img/dishes/plate-avocado-toast.jpg',
 
   'green salad':
-    'assets/img/dishes/spring-salad.jpg',
+    'assets/img/dishes/plate-green-salad.jpg',
 
   'spring salad':
     'assets/img/dishes/spring-salad.jpg',
@@ -166,36 +168,41 @@ export class MenuPageComponent implements OnInit {
   }
 
   loadDishes(): void {
-    const category = this.selectedCategory ?? undefined;
-    const sort = this.selectedSort;
+    // The public menu and owner pre-order now use the SAME 18 real API dishes.
+    // Do not send temporary showcase-* IDs to the order endpoint.
+    this.dishesService.getDishes().subscribe({
+      next: (data) => {
+        this.dishes = selectEighteenRealDishes(data);
+        const visible = this.dishes.filter(
+          (dish) => !this.selectedCategory || dish.dishType === this.selectedCategory
+        );
 
-    this.dishesService.getDishes(category, sort).subscribe((data) => {
-      this.dishes = data.map((dish) => ({
-        ...dish,
+        switch (this.selectedSort) {
+          case DishSort.PriceAscending:
+            visible.sort((a, b) => a.price - b.price);
+            break;
+          case DishSort.PriceDescending:
+            visible.sort((a, b) => b.price - a.price);
+            break;
+          case DishSort.PopularityAscending:
+            visible.reverse();
+            break;
+          default:
+            // Keep the chosen 18-card visual order in the reference catalog.
+            break;
+        }
 
-        imageUrl: this.getRealDishPhoto(
-          dish.name,
-          dish.imageUrl
-        ),
-
-        name: dish.name || 'Unknown Dish',
-        price: dish.price || 0,
-        weight: dish.weight || 'N/A',
-        description: dish.description || 'N/A',
-        state: dish.state || 'N/A',
-        dishType: dish.dishType || 'N/A',
-        calories: dish.calories || '0',
-        proteins: dish.proteins || '0',
-        fats: dish.fats || '0',
-        carbohydrates: dish.carbohydrates || '0',
-        vitamins: dish.vitamins || '0',
-      }));
-
-      this.filteredDishes = this.dishes;
+        this.filteredDishes = visible;
+      },
+      error: () => {
+        this.dishes = [];
+        this.filteredDishes = [];
+        this.toast.error('Unable to load the restaurant menu.', 'Menu');
+      },
     });
   }
 
-  onCategorySelected(category: DishType): void {
+  onCategorySelected(category: DishType | null): void {
     this.selectedCategory =
       this.selectedCategory === category ? null : category;
 

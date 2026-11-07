@@ -1,3 +1,4 @@
+import { selectFiveFeaturedDishes } from '@app/shared/helpers/restaurant-menu.helpers';
 import { Component, ChangeDetectionStrategy, OnInit, inject, computed } from '@angular/core';
 import { RouterLink, ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -84,13 +85,8 @@ export class MainPageComponent implements OnInit {
 
   loadPopularDishes(): void {
     this.dishesService.getPopularDishes().subscribe((data) => {
-      this.dishes = data.slice(0, 8).map((dish) => ({
-        ...dish,
-        imageUrl: getDishImageUrl(dish.name, dish.imageUrl) ?? '',
-        name: dish.name || 'Unknown Dish',
-        price: dish.price || 0,
-        weight: dish.weight || 'N/A',
-      }));
+      // One compact row only. Every featured dish has a real API ID.
+      this.dishes = selectFiveFeaturedDishes(data);
     });
   }
 

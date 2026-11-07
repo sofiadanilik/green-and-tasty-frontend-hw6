@@ -17,6 +17,7 @@ export class DishCardComponent {
   readonly dish = input.required<DishListResponse>();
   readonly maxWidth = input('');
   readonly preOrderEnabled = input(false);
+  readonly compactMenu = input(false);
 
   readonly dishClicked = output<void>();
   readonly preOrderClicked = output<void>();

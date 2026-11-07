@@ -3,6 +3,7 @@
     role="button"
     [tabindex]="isUnavailable() ? -1 : 0"
     [class.unavailable]="isUnavailable()"
+    [class.compact-menu]="compactMenu()"
     [style.max-width]="maxWidth() || null"
     (click)="onCardClicked()"
     (keydown.space)="onCardClicked()"
@@ -33,6 +34,10 @@
       @if (preOrderEnabled()) {
         <app-custom-button size="small" fullWidth [disabled]="isUnavailable()" (click)="preOrderClicked.emit()">
           Pre-Order
+        </app-custom-button>
+      } @else if (compactMenu()) {
+        <app-custom-button size="small" fullWidth [disabled]="isUnavailable()" (click)="$event.stopPropagation(); onCardClicked()">
+          View dish
         </app-custom-button>
       }
     </div>

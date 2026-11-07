@@ -31,6 +31,8 @@
     <div class="menu-section">
       <div class="filter-sort-bar">
         <div class="category-buttons">
+        <!-- GT_SHOWCASE_18_V1_ALL -->
+        <button type="button" (click)="onCategorySelected(null)" [class.active]="selectedCategory === null">All dishes</button>
           @for (category of menuCategories; track category) {
             <button
               (click)="onCategorySelected(category)"
@@ -60,7 +62,7 @@
             [preOrderEnabled]="isPreOrderEnabled"
             (dishClicked)="openModal(dish)"
             (preOrderClicked)="addDishToCart(dish)"
-            maxWidth="288px"
+            [compactMenu]="true"
           ></app-dish-card>
         }
       </div>

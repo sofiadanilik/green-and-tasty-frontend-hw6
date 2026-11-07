@@ -201,3 +201,143 @@
     }
   }
 }
+
+
+/* GT_MENU_DESIGN_V1: desktop five-column menu, mobile responsive. */
+.menu-container {
+  .content-sections {
+    margin: 2rem clamp(1rem, 3vw, 3.5rem);
+  }
+
+  .menu-section { gap: 1.15rem; }
+
+  .menu-section .dish-cards {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: stretch;
+    justify-content: initial;
+    gap: 1.25rem;
+    width: 100%;
+    margin: 0;
+  }
+
+  .filter-sort-bar {
+    border-bottom: 1px solid #e4e9df;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.6rem;
+    align-items: flex-end;
+  }
+
+  .category-buttons {
+    flex-wrap: wrap;
+    gap: 0.3rem 0.75rem;
+
+    button {
+      background: transparent;
+      color: #3a4e42;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      padding: 0.65rem 0.75rem;
+      font-weight: 600;
+      transition: color 160ms ease;
+
+      &:hover { color: #08773e; }
+      &.active {
+        color: #08773e;
+        background: transparent;
+        border-bottom-color: #08773e;
+      }
+    }
+  }
+
+  .sort-dropdown select {
+    min-height: 2.4rem;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid #dce5dc;
+    border-radius: 0.65rem;
+    background: #fff;
+    color: #263a2d;
+  }
+}
+@media (max-width: 1279px) {
+  .menu-container .menu-section .dish-cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1020px) {
+  .menu-container .menu-section .dish-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .menu-container .menu-section .dish-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+  }
+}
+@media (max-width: 490px) {
+  .menu-container .menu-section .dish-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* GT_PLATED_MENU_V2: reference-like 5-column menu cards and clean category tabs. */
+.menu-container {
+  background: #f8f9f2;
+  .content-sections { margin: 1.8rem clamp(1rem, 3vw, 3.25rem); }
+  .menu-section .dish-cards {
+    max-width: 1580px;
+    margin: 0 auto;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1.15rem;
+    align-items: stretch;
+  }
+  .filter-sort-bar { border-bottom: 0; padding-bottom: 0; margin-bottom: .25rem; }
+  .category-buttons button {
+    border-radius: 0;
+    border-bottom: 2px solid transparent;
+    &.active { border-bottom-color: #087f3c; }
+  }
+}
+@media (max-width: 1250px) {
+  .menu-container .menu-section .dish-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 1000px) {
+  .menu-container .menu-section .dish-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .menu-container .menu-section .dish-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 460px) {
+  .menu-container .menu-section .dish-cards { grid-template-columns: 1fr; }
+}
+
+/* GT_SHOWCASE_18_V1: 6-column editorial menu, reference proportions. */
+.menu-container {
+  background: #fafbf7;
+  .content-sections { margin: 1.5rem clamp(1rem, 2vw, 2.5rem); }
+  .menu-section .dish-cards {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.9rem;
+    align-items: stretch;
+    justify-content: initial;
+  }
+  .filter-sort-bar { margin-bottom: 0.25rem; }
+}
+@media (max-width: 1450px) {
+  .menu-container .menu-section .dish-cards { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+@media (max-width: 1150px) {
+  .menu-container .menu-section .dish-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 920px) {
+  .menu-container .menu-section .dish-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 680px) {
+  .menu-container .menu-section .dish-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 390px) {
+  .menu-container .menu-section .dish-cards { grid-template-columns: 1fr; }
+}

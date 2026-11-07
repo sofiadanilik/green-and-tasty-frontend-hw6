@@ -270,3 +270,22 @@
         }
     }
 }
+/* GT_REAL_MENU_EVERYWHERE_V1: match the 18-card owner/public menu layout. */
+@media (min-width: 1451px) {
+  .menu-section .dish-cards { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.9rem; }
+}
+@media (min-width: 1151px) and (max-width: 1450px) {
+  .menu-section .dish-cards { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.9rem; }
+}
+@media (min-width: 921px) and (max-width: 1150px) {
+  .menu-section .dish-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.9rem; }
+}
+@media (min-width: 681px) and (max-width: 920px) {
+  .menu-section .dish-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.9rem; }
+}
+@media (max-width: 680px) {
+  .menu-section .dish-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; }
+}
+@media (max-width: 390px) {
+  .menu-section .dish-cards { grid-template-columns: minmax(0, 1fr); }
+}

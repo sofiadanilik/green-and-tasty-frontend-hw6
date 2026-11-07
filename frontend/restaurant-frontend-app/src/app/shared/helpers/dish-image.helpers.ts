@@ -6,13 +6,13 @@ const LOCAL_DISH_IMAGES: Readonly<Record<string, string>> = {
   'roasted-sweet-potato-and-lentil-salad':
     'assets/img/dishes/roasted-sweet-potato-and-lentil-salad.jpg',
   'spring-salad': 'assets/img/dishes/spring-salad.jpg',
-  'green-salad': 'assets/img/dishes/spring-salad.jpg',
+  'green-salad': 'assets/img/dishes/plate-green-salad.jpg',
 
-  'fresh-avocado-toast': 'assets/img/dishes/avocado-toast-photo.jpg',
-  'grilled-salmon': 'assets/img/dishes/grilled-salmon-photo.jpg',
-  'grilled-salmon-2': 'assets/img/dishes/grilled-salmon.svg',
-  'truffle-mushroom-risotto': 'assets/img/dishes/mushroom-risotto-photo.jpg',
-  'margherita-pizza': 'assets/img/dishes/margherita-pizza-photo.jpg',
+  'fresh-avocado-toast': 'assets/img/dishes/plate-avocado-toast.jpg',
+  'grilled-salmon': 'assets/img/dishes/plate-grilled-salmon.jpg',
+  'grilled-salmon-2': 'assets/img/dishes/plate-grilled-salmon.jpg',
+  'truffle-mushroom-risotto': 'assets/img/dishes/plate-mushroom-risotto.jpg',
+  'margherita-pizza': 'assets/img/dishes/plate-margherita-pizza.jpg',
 };
 
 const LOCAL_E2E_DISH_IMAGES: Readonly<Record<string, string>> = {
