@@ -101,4 +101,8 @@ jobs:
 
       - name: Expose test outcome
         if: always()
-        run: 'echo "Test step outcome: ${{ steps.tests.outcome }}"'
+        run: |
+          echo "Test step outcome: ${{ steps.tests.outcome }}"
+          if [ "${{ steps.tests.outcome }}" != "success" ]; then
+            exit 1
+          fi
