@@ -1,13 +1,12 @@
 
 import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { catchError, map, Observable, of, switchMap, throwError } from 'rxjs';
+import { catchError, map, Observable, of, throwError } from 'rxjs';
 
 import { Participant } from '@app/models/group-orders/participant.model';
 import { Order } from '@app/models/orders/order.model';
 import { GroupReservationDetails } from '@app/models/reservations/guest-invite.model';
 import { API_BASE_URL } from '@app/shared/config/api-base-url.token';
-import { GuestInviteService } from '@app/services/reservation/guest-invite.service';
 import { apiUrlForGroup, apiUrlForReservation } from '@app/shared/config/local-e2e-routing';
 
 import { SKIP_ERROR_TOAST } from '@app/auth/skip-error-toast.context';
@@ -45,33 +44,13 @@ export interface ConsolidatedDish {
 })
 export class GroupOrdersService {
   private readonly http = inject(HttpClient);
-  private readonly guestInviteService = inject(GuestInviteService);
   private readonly baseUrl = inject(API_BASE_URL).replace(/\/$/, '');
 
-  // Load group details through the authenticated Owner endpoint.
+  // Owner-only read endpoint: works before and after group submission.
   getOwnerGroup$(reservationId: string): Observable<GroupReservationDetails> {
-    return this.guestInviteService.getInviteToken$(reservationId).pipe(
-      switchMap((response) => {
-        const result = response as unknown as Record<string, unknown>;
-        const token = [
-          result['Token'],
-          result['token'],
-          result['InviteToken'],
-          result['inviteToken'],
-          result['ReservationToken'],
-          result['reservationToken'],
-        ].find((value): value is string =>
-          typeof value === 'string' && value.trim().length > 0
-        );
-
-        if (!token) {
-          return throwError(() => new Error('Invitation token missing in API response'));
-        }
-
-        return this.guestInviteService.getInvite$(token);
-      }),
-      map(normalizeOwnerGroup)
-    );
+    return this.http.get<unknown>(
+      `${apiUrlForReservation(this.baseUrl, reservationId)}/reservations/${reservationId}/group`
+    ).pipe(map(normalizeOwnerGroup));
   }
   getOwnerPreOrder$(
     reservationId: string,
