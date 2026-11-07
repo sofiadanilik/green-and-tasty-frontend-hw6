@@ -36,7 +36,7 @@ test('@l1 @ui group Owner page polls again after 15 seconds', async ({ page, req
   let refreshes = 0;
   page.on('request', req => { if (req.method() === 'GET' && req.url().includes('/sessions')) refreshes++; });
   await page.goto(`/reservations/${reservationId}/group-order`);
-  await expect(page.getByText('Collecting pre-orders')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Group Pre-Order' })).toBeVisible();
   await expect.poll(() => refreshes, { timeout: 20_000 }).toBeGreaterThanOrEqual(2);
 });
 
