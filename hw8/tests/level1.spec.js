@@ -30,13 +30,26 @@ test('@l1 @ui Owner sees participant cards and Grand Total', async ({ page, requ
   await expect(page.locator('.participants li').first()).toBeVisible();
 });
 
-test('@l1 @ui group Owner page polls again after 15 seconds', async ({ page, request }) => {
-  test.skip(!haveOwner || !reservationId, 'Requires open Group Order and an Owner account');
+test('@l1 @ui Owner group view respects order status and polls when collecting', async ({ page, request }) => {
+  test.skip(!haveOwner || !reservationId, 'Requires an Owner account and group reservation');
+
   await loginPage(page, request);
+
   let refreshes = 0;
-  page.on('request', req => { if (req.method() === 'GET' && req.url().includes('/sessions')) refreshes++; });
+  page.on('request', req => {
+    if (req.method() === 'GET' && req.url().includes('/sessions')) refreshes++;
+  });
+
   await page.goto(`/reservations/${reservationId}/group-order`);
   await expect(page.getByRole('heading', { name: 'Group Pre-Order' })).toBeVisible();
+
+  if (await page.getByText('Sent to Restaurant').isVisible()) {
+    await expect(page.getByText('Grand Total')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Submit Pre-Order' })).toBeDisabled();
+    return;
+  }
+
+  await expect(page.getByText('Collecting pre-orders')).toBeVisible();
   await expect.poll(() => refreshes, { timeout: 20_000 }).toBeGreaterThanOrEqual(2);
 });
 
